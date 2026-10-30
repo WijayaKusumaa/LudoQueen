@@ -113,7 +113,7 @@ export function dispatchAction(state: GameState, action: GameAction): ActionResu
       if (action.forcedValue !== undefined) {
         die = action.forcedValue;
       } else {
-        const [rolled, rng] = rollDie(state.rng);
+        const [rolled, rng] = rollDie(state.rng, state.current);
         die = rolled;
         nextRng = rng;
       }

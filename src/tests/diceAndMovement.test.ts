@@ -27,6 +27,50 @@ describe('Audit Sistem Dadu dan Pergerakan Pion Ludo', () => {
       }
     });
 
+    it('pemain hijau memiliki probabilitas dadu 6 lebih tinggi (~33.3%) dibanding angka lain', () => {
+      const counts: Record<DieValue, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+      let state = 987654321;
+      const totalRolls = 60000;
+
+      for (let i = 0; i < totalRolls; i++) {
+        const [value, nextState] = rollDie(state, 'green');
+        counts[value]++;
+        state = nextState;
+      }
+
+      // Angka 6 untuk hijau muncul ~33.3% (~20.000 kali dari 60.000 lemparan)
+      expect(counts[6]).toBeGreaterThan(19000);
+      expect(counts[6]).toBeLessThan(21000);
+
+      // Angka 1-5 muncul seimbang ~13.3% (~8.000 kali masing-masing)
+      for (let face = 1; face <= 5; face++) {
+        const count = counts[face as DieValue];
+        expect(count).toBeGreaterThan(7000);
+        expect(count).toBeLessThan(9000);
+      }
+    });
+
+    it('pemain kuning, merah, dan biru memiliki probabilitas yang setara untuk setiap angka 1-6', () => {
+      for (const color of ['yellow', 'red', 'blue'] as const) {
+        const counts: Record<DieValue, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+        let state = 555666777;
+        const totalRolls = 60000;
+
+        for (let i = 0; i < totalRolls; i++) {
+          const [value, nextState] = rollDie(state, color);
+          counts[value]++;
+          state = nextState;
+        }
+
+        // Setiap angka 1-6 memiliki probabilitas setara (~16.67% atau ~10.000 kali)
+        for (let face = 1; face <= 6; face++) {
+          const count = counts[face as DieValue];
+          expect(count).toBeGreaterThan(9000);
+          expect(count).toBeLessThan(11000);
+        }
+      }
+    });
+
     it('fungsi nextRandom menghasilkan nilai float dalam rentang [0, 1)', () => {
       let state = 42;
       for (let i = 0; i < 1000; i++) {
