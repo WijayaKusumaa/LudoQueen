@@ -1,4 +1,4 @@
-import { PLAYER_ORDER, SAFE_INDICES, START_INDEX, TRACK_LENGTH, type PlayerColor } from '../board/boardLayout';
+import { PLAYER_ORDER, SAFE_INDICES, STAR_INDICES, START_INDEX, TRACK_LENGTH, type PlayerColor } from '../board/boardLayout';
 import type { RulesConfig, SafeCellRule } from './config';
 import {
   BASE,
@@ -37,6 +37,7 @@ export function pathOf(color: PlayerColor, from: number, to: number): PawnLocati
 }
 
 const SAFE_SETS: Readonly<Record<SafeCellRule, ReadonlySet<number>>> = {
+  starOnly: new Set(STAR_INDICES),
   startAndStar: new Set(SAFE_INDICES),
   startOnly: new Set(PLAYER_ORDER.map((c) => START_INDEX[c])),
   none: new Set(),

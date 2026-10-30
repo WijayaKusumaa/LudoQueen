@@ -1,7 +1,7 @@
 import type { DieValue } from './types';
 
-/** Aturan kotak aman yang dipakai. */
-export type SafeCellRule = 'startAndStar' | 'startOnly' | 'none';
+/** Aturan kotak aman yang dipakai: 'starOnly' (hanya petak bintang, default standar Ludo), 'startAndStar', 'startOnly', 'none'. */
+export type SafeCellRule = 'starOnly' | 'startAndStar' | 'startOnly' | 'none';
 
 /** Kapan permainan berakhir. */
 export type EndCondition = 'firstFinisher' | 'allButOne';
@@ -35,7 +35,7 @@ export const DEFAULT_RULES: RulesConfig = Object.freeze({
   extraTurnOnCapture: true,
   extraTurnOnHome: true,
   maxConsecutiveSixes: 3,
-  safeCells: 'startAndStar',
+  safeCells: 'starOnly',
   friendlyStacking: true,
   blockades: false,
   endCondition: 'firstFinisher',

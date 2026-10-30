@@ -27,31 +27,8 @@ describe('Audit Sistem Dadu dan Pergerakan Pion Ludo', () => {
       }
     });
 
-    it('pemain hijau memiliki probabilitas dadu 6 lebih tinggi (~33.3%) dibanding angka lain', () => {
-      const counts: Record<DieValue, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
-      let state = 987654321;
-      const totalRolls = 60000;
-
-      for (let i = 0; i < totalRolls; i++) {
-        const [value, nextState] = rollDie(state, 'green');
-        counts[value]++;
-        state = nextState;
-      }
-
-      // Angka 6 untuk hijau muncul ~33.3% (~20.000 kali dari 60.000 lemparan)
-      expect(counts[6]).toBeGreaterThan(19000);
-      expect(counts[6]).toBeLessThan(21000);
-
-      // Angka 1-5 muncul seimbang ~13.3% (~8.000 kali masing-masing)
-      for (let face = 1; face <= 5; face++) {
-        const count = counts[face as DieValue];
-        expect(count).toBeGreaterThan(7000);
-        expect(count).toBeLessThan(9000);
-      }
-    });
-
-    it('pemain kuning, merah, dan biru memiliki probabilitas yang setara untuk setiap angka 1-6', () => {
-      for (const color of ['yellow', 'red', 'blue'] as const) {
+    it('seluruh pemain (kuning, biru, merah, hijau) memiliki probabilitas yang setara dan adil untuk setiap angka 1-6', () => {
+      for (const color of ['yellow', 'blue', 'red', 'green'] as const) {
         const counts: Record<DieValue, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
         let state = 555666777;
         const totalRolls = 60000;
@@ -62,7 +39,7 @@ describe('Audit Sistem Dadu dan Pergerakan Pion Ludo', () => {
           state = nextState;
         }
 
-        // Setiap angka 1-6 memiliki probabilitas setara (~16.67% atau ~10.000 kali)
+        // Setiap angka 1-6 memiliki probabilitas setara (~16.67% atau ~10.000 kali dari 60.000 lemparan)
         for (let face = 1; face <= 6; face++) {
           const count = counts[face as DieValue];
           expect(count).toBeGreaterThan(9000);
@@ -307,6 +284,110 @@ describe('Audit Sistem Dadu dan Pergerakan Pion Ludo', () => {
       if (!wrongPlayerRoll.ok) {
         expect(wrongPlayerRoll.error).toBe('NOT_YOUR_TURN');
       }
+    });
+  });
+
+  describe('4. Sistem Petak Bintang Aman dan Penangkapan Pion (Capture)', () => {
+    it('pion di petak bintang aman dari tangkapan saat pion lawan mendarat di petak yang sama', () => {
+      const baseState = createInitialGameState();
+      // Kuning di step 2 (index 2). Biru di step 47 (yang bertepatan di track index 8 = petak bintang).
+      // Kuning butuh dadu 6 untuk mencapai step 8 (track index 8).
+      const customState: GameState = {
+        ...baseState,
+        current: 'yellow',
+        pawns: {
+          ...baseState.pawns,
+          yellow: [2, BASE, BASE, BASE],
+          blue: [47, BASE, BASE, BASE], // (13 + 47) % 52 = 8 (petak bintang)
+        },
+      };
+
+      const rollRes = dispatchAction(customState, { type: 'ROLL', forcedValue: 6 });
+      expect(rollRes.ok).toBe(true);
+      if (!rollRes.ok) return;
+
+      const move = rollRes.state.legalMoves.find((m) => m.pawn === 0);
+      expect(move).toBeDefined();
+      expect(move!.to).toBe(8);
+      // Di petak bintang, tidak ada penangkapan (captures kosong)
+      expect(move!.captures).toHaveLength(0);
+
+      const moveRes = dispatchAction(rollRes.state, { type: 'MOVE', pawn: 0 });
+      expect(moveRes.ok).toBe(true);
+      if (!moveRes.ok) return;
+
+      // Keduanya tetap di petak yang sama dan pion biru tetap aman (tidak ke base)
+      expect(moveRes.state.pawns.yellow[0]).toBe(8);
+      expect(moveRes.state.pawns.blue[0]).toBe(47);
+      expect(moveRes.events.some((e) => e.type === 'pawnCaptured')).toBe(false);
+    });
+
+    it('pion di luar petak bintang akan ditangkap dan kembali ke base saat pion lawan mendarat di petak yang sama', () => {
+      const baseState = createInitialGameState();
+      // Kuning di step 0 (index 0). Biru di step 44 (track index 5: (13 + 44) % 52 = 5, bukan petak bintang).
+      const customState: GameState = {
+        ...baseState,
+        current: 'yellow',
+        pawns: {
+          ...baseState.pawns,
+          yellow: [0, BASE, BASE, BASE],
+          blue: [44, BASE, BASE, BASE],
+        },
+      };
+
+      const rollRes = dispatchAction(customState, { type: 'ROLL', forcedValue: 5 });
+      expect(rollRes.ok).toBe(true);
+      if (!rollRes.ok) return;
+
+      const move = rollRes.state.legalMoves.find((m) => m.pawn === 0);
+      expect(move).toBeDefined();
+      expect(move!.captures).toEqual([{ color: 'blue', pawn: 0 }]);
+
+      const moveRes = dispatchAction(rollRes.state, { type: 'MOVE', pawn: 0 });
+      expect(moveRes.ok).toBe(true);
+      if (!moveRes.ok) return;
+
+      // Pion biru yang ditabrak kembali ke base (BASE = -1)
+      expect(moveRes.state.pawns.blue[0]).toBe(BASE);
+      // Pion kuning menempati step 5
+      expect(moveRes.state.pawns.yellow[0]).toBe(5);
+      // Event pawnCaptured dipancarkan
+      expect(moveRes.events.some((e) => e.type === 'pawnCaptured')).toBe(true);
+      // Menangkap pion memberikan giliran tambahan
+      expect(moveRes.state.current).toBe('yellow');
+    });
+
+    it('pion yang keluar dari base (dadu 6) memakan pion lawan yang berada di petak start tersebut', () => {
+      const baseState = createInitialGameState();
+      // Kuning semua di base. Biru di step 39 (track index 0: (13 + 39) % 52 = 0, yaitu petak start kuning).
+      const customState: GameState = {
+        ...baseState,
+        current: 'yellow',
+        pawns: {
+          ...baseState.pawns,
+          yellow: [BASE, BASE, BASE, BASE],
+          blue: [39, BASE, BASE, BASE],
+        },
+      };
+
+      const rollRes = dispatchAction(customState, { type: 'ROLL', forcedValue: 6 });
+      expect(rollRes.ok).toBe(true);
+      if (!rollRes.ok) return;
+
+      const move = rollRes.state.legalMoves.find((m) => m.pawn === 0);
+      expect(move).toBeDefined();
+      expect(move!.kind).toBe('enter');
+      // Karena petak start bukan petak bintang, pion biru yang bertengger di situ tertangkap
+      expect(move!.captures).toEqual([{ color: 'blue', pawn: 0 }]);
+
+      const moveRes = dispatchAction(rollRes.state, { type: 'MOVE', pawn: 0 });
+      expect(moveRes.ok).toBe(true);
+      if (!moveRes.ok) return;
+
+      // Pion biru kembali ke base
+      expect(moveRes.state.pawns.blue[0]).toBe(BASE);
+      // Pion kuning berada di step 0
+      expect(moveRes.state.pawns.yellow[0]).toBe(0);
     });
   });
 });

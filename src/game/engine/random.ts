@@ -11,22 +11,9 @@ export function nextRandom(state: number): [number, number] {
 
 /**
  * Melempar dadu 1-6.
- * - Untuk pemain 'green' (hijau), probabilitas mendapatkan angka 6 ditingkatkan menjadi 1/3 (~33.3%),
- *   sedangkan angka 1-5 masing-masing memiliki peluang ~13.3%.
- * - Untuk pemain kuning, merah, dan biru, peluang setiap angka 1-6 setara (1/6 atau ~16.67%).
+ * Semua pemain (kuning, biru, merah, hijau) memiliki probabilitas seragam dan adil (1/6 untuk setiap angka 1-6).
  */
-export function rollDie(state: number, player?: PlayerColor): [DieValue, number] {
+export function rollDie(state: number, _player?: PlayerColor): [DieValue, number] {
   const [r, next] = nextRandom(state);
-
-  if (player === 'green') {
-    // Peluang angka 6 ditingkatkan menjadi 33.33% (2x lipat normal)
-    if (r < 1 / 3) {
-      return [6 as DieValue, next];
-    }
-    // Sisa peluang terdistribusi merata untuk angka 1-5 (masing-masing 13.33%)
-    const otherVal = Math.floor(((r - 1 / 3) / (2 / 3)) * 5) + 1;
-    return [otherVal as DieValue, next];
-  }
-
   return [(Math.floor(r * 6) + 1) as DieValue, next];
 }

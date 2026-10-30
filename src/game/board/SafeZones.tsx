@@ -1,8 +1,8 @@
 import { useLayoutEffect, useMemo, useRef } from 'react';
 import { Color, ExtrudeGeometry, InstancedMesh, Matrix4, Shape } from 'three';
-import { PLAYER_ORDER, SAFE_INDICES, START_INDEX, TRACK } from './boardLayout';
+import { STAR_INDICES, TRACK } from './boardLayout';
 import { HEIGHTS, gridToWorld } from './boardCoordinates';
-import { PALETTE, PLAYER_THEME } from '../palette';
+import { PALETTE } from '../palette';
 
 function starGeometry(outer: number, inner: number): ExtrudeGeometry {
   const shape = new Shape();
@@ -28,7 +28,7 @@ function starGeometry(outer: number, inner: number): ExtrudeGeometry {
   return g;
 }
 
-/** Bintang pada kotak aman: start tiap pemain (warna pemain) dan bintang emas. */
+/** Bintang emas pada 4 petak aman: area bintang di setiap kuadran jalur bersama. */
 export function SafeZones() {
   const ref = useRef<InstancedMesh>(null);
   const geometry = useMemo(() => starGeometry(0.32, 0.14), []);
@@ -37,13 +37,11 @@ export function SafeZones() {
     const mesh = ref.current;
     if (!mesh) return;
     const m = new Matrix4();
-    const c = new Color();
-    SAFE_INDICES.forEach((idx, i) => {
+    const c = new Color(PALETTE.star);
+    STAR_INDICES.forEach((idx, i) => {
       const w = gridToWorld(TRACK[idx]!);
       m.makeTranslation(w.x, 0, w.z);
       mesh.setMatrixAt(i, m);
-      const owner = PLAYER_ORDER.find((p) => START_INDEX[p] === idx);
-      c.set(owner ? PLAYER_THEME[owner].dark : PALETTE.star);
       mesh.setColorAt(i, c);
     });
     mesh.instanceMatrix.needsUpdate = true;
@@ -51,7 +49,7 @@ export function SafeZones() {
   }, []);
 
   return (
-    <instancedMesh ref={ref} args={[geometry, undefined, SAFE_INDICES.length]} receiveShadow>
+    <instancedMesh ref={ref} args={[geometry, undefined, STAR_INDICES.length]} receiveShadow>
       <meshStandardMaterial roughness={0.5} metalness={0.1} />
     </instancedMesh>
   );

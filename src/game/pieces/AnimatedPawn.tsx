@@ -111,6 +111,8 @@ export interface AnimatedPawnProps {
   /** Posisi otoritatif (dari GameState) — dipakai bila pion tidak sedang dianimasikan. */
   rest: [number, number, number];
   presentation: PresentationController;
+  /** Skala ukuran pion (mis. 0.82 bila berbagi petak dengan pion lain). */
+  scale?: number;
   /** Apakah pion ini boleh dipilih sekarang (sudah memperhitungkan kunci input). */
   selectable: boolean;
   /** Animasi diizinkan (false = tanpa denyut/lonjakan, hasil tetap sama). */
@@ -128,6 +130,7 @@ export function AnimatedPawn({
   pawnIdx,
   rest,
   presentation,
+  scale = 1,
   selectable,
   animate,
   celebrate,
@@ -160,6 +163,7 @@ export function AnimatedPawn({
     let lift = hovered.current && selectable ? HOVER_LIFT : 0;
     if (celebrate && animate) lift += Math.max(0, Math.sin(t * 3.2 - pawnIdx * 0.9)) * 0.14;
     g.position.set(x, y + lift, z);
+    g.scale.setScalar(scale);
 
     const ring = ringRef.current;
     if (ring && selectable) {
