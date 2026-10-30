@@ -48,7 +48,7 @@ export function createInitialGameState(options?: CreateGameOptions): GameState {
     lastRoll: null,
     finishOrder: Object.freeze([]),
     winner: null,
-    rng: (options?.seed ?? 20261021) >>> 0,
+    rng: (options?.seed ?? (Math.random() * 0xffffffff)) >>> 0,
     version: 1,
   };
 

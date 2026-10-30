@@ -9,12 +9,15 @@ const POLAR = 0.55; // rad dari vertikal; cukup menukik agar jalur terbaca jelas
 /** Ruang aman di sekitar papan agar HUD tidak menutupi sel. */
 const MARGIN = 1.04;
 
-/** Jarak kamera agar seluruh papan (persegi) muat di viewport dengan aspek tertentu. */
+/** Jarak kamera agar seluruh papan (persegi) muat di viewport dengan aspek tertentu.
+ * Menyesuaikan margin secara responsif untuk layar ponsel portrait, tablet, maupun layar laptop lebar. */
 export function fitDistance(aspect: number): number {
   const vHalf = MathUtils.degToRad(FOV) / 2;
   const tv = Math.tan(vHalf);
   const th = tv * aspect;
-  const half = ISLAND_HALF_EXTENT * MARGIN;
+  // Di layar ponsel potret (aspek < 0.75), beri sedikit margin ekstra agar pulau tidak terlalu mepet tepi layar
+  const dynamicMargin = aspect < 0.75 ? 1.08 : MARGIN;
+  const half = ISLAND_HALF_EXTENT * dynamicMargin;
   // sisi dekat/jauh papan memantul ke layar dengan faktor cos/sin sudut tilt
   const dv = (half * Math.cos(POLAR) + 0.4) / tv + half * Math.sin(POLAR);
   const dh = half / th + half * Math.sin(POLAR) * 0.6;

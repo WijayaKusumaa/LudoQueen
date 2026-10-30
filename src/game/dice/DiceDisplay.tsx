@@ -11,8 +11,17 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { RoundedBox } from '@react-three/drei';
-import { CanvasTexture, Euler, Group, Mesh, MeshBasicMaterial, Quaternion, RingGeometry } from 'three';
+import {
+  CanvasTexture,
+  Euler,
+  Group,
+  Mesh,
+  MeshBasicMaterial,
+  MeshPhysicalMaterial,
+  Quaternion,
+  RingGeometry,
+} from 'three';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import type { DieValue } from '../engine/types';
 import type { PlayerColor } from '../board/boardLayout';
 import { BASE_CENTER } from '../board/boardLayout';
@@ -106,6 +115,25 @@ export function DiceDisplay({ value, player, canRoll, animate, presentation, onR
   const euler = useMemo(() => new Euler(), []);
 
   const faceTextures = useMemo(() => [1, 2, 3, 4, 5, 6].map(makeFaceTexture), []);
+  const diceGeo = useMemo(() => new RoundedBoxGeometry(SIZE, SIZE, SIZE, 4, 0.09), []);
+  const diceMaterials = useMemo(
+    () => [
+      // +X: face 4
+      new MeshPhysicalMaterial({ color: '#fef9ec', map: faceTextures[3], roughness: 0.35 }),
+      // -X: face 3
+      new MeshPhysicalMaterial({ color: '#fef9ec', map: faceTextures[2], roughness: 0.35 }),
+      // +Y: face 1
+      new MeshPhysicalMaterial({ color: '#fef9ec', map: faceTextures[0], roughness: 0.35 }),
+      // -Y: face 6
+      new MeshPhysicalMaterial({ color: '#fef9ec', map: faceTextures[5], roughness: 0.35 }),
+      // +Z: face 5
+      new MeshPhysicalMaterial({ color: '#fef9ec', map: faceTextures[4], roughness: 0.35 }),
+      // -Z: face 2
+      new MeshPhysicalMaterial({ color: '#fef9ec', map: faceTextures[1], roughness: 0.35 }),
+    ],
+    [faceTextures],
+  );
+
   const ringGeo = useMemo(() => new RingGeometry(0.62, 0.78, 40), []);
   const ringMat = useMemo(
     () => new MeshBasicMaterial({ transparent: true, opacity: 0.7, depthWrite: false }),
@@ -113,11 +141,13 @@ export function DiceDisplay({ value, player, canRoll, animate, presentation, onR
   );
   useEffect(
     () => () => {
+      diceGeo.dispose();
+      diceMaterials.forEach((m) => m.dispose());
       ringGeo.dispose();
       ringMat.dispose();
       if (hovered.current) document.body.style.cursor = '';
     },
-    [ringGeo, ringMat],
+    [diceGeo, diceMaterials, ringGeo, ringMat],
   );
   useEffect(() => {
     ringMat.color.set(PLAYER_THEME[player].light);
@@ -191,15 +221,7 @@ export function DiceDisplay({ value, player, canRoll, animate, presentation, onR
         document.body.style.cursor = '';
       }}
     >
-      <RoundedBox args={[SIZE, SIZE, SIZE]} radius={0.09} smoothness={4} castShadow>
-        {/* Urutan material: +X -X +Y -Y +Z -Z */}
-        <meshPhysicalMaterial attach="material-0" color="#fef9ec" map={faceTextures[3]} roughness={0.35} />
-        <meshPhysicalMaterial attach="material-1" color="#fef9ec" map={faceTextures[2]} roughness={0.35} />
-        <meshPhysicalMaterial attach="material-2" color="#fef9ec" map={faceTextures[0]} roughness={0.35} />
-        <meshPhysicalMaterial attach="material-3" color="#fef9ec" map={faceTextures[5]} roughness={0.35} />
-        <meshPhysicalMaterial attach="material-4" color="#fef9ec" map={faceTextures[4]} roughness={0.35} />
-        <meshPhysicalMaterial attach="material-5" color="#fef9ec" map={faceTextures[1]} roughness={0.35} />
-      </RoundedBox>
+      <mesh geometry={diceGeo} material={diceMaterials} castShadow />
 
       {/* Area sentuh lebih besar untuk jari */}
       {canRoll && (

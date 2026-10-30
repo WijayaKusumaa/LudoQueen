@@ -9,8 +9,9 @@
 import { useMemo, useRef } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 
-/** Jarak maksimum (px) antara pointerdown dan pointerup agar masih dianggap tap. */
-export const TAP_SLOP_PX = 12;
+/** Jarak maksimum (px) antara pointerdown dan pointerup agar masih dianggap tap.
+ * Toleran terhadap pergeseran jari lembut pada layar sentuh HP dan tablet. */
+export const TAP_SLOP_PX = 18;
 /** Durasi maksimum (ms) sebuah tap. */
 export const TAP_MAX_MS = 700;
 
