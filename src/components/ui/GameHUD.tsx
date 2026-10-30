@@ -86,11 +86,11 @@ function PlayerCornerCard({ color }: { color: PlayerColor }) {
           onKeyDown={
             canRollHere
               ? (e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    roll();
-                  }
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  roll();
                 }
+              }
               : undefined
           }
           title={canRollHere ? 'Ketuk untuk melempar dadu' : undefined}
@@ -166,19 +166,10 @@ function TurnBadge() {
 
 function RollControls() {
   const { state, anim, locked, roll, skipAnimation } = useGame();
-  const last = state.lastRoll;
   const canRoll = !locked && state.phase === 'awaitingRoll';
 
   return (
     <div className="roll-controls">
-      {last && !anim.rolling && (
-        <div className="dice-result" aria-label={`Hasil dadu terakhir: ${last.value}`}>
-          <span className="dice-result__icon">🎲</span>
-          <span className="dice-result__label">
-            {PLAYER_NAMES[last.player]}: <strong>{last.value}</strong>
-          </span>
-        </div>
-      )}
       {anim.busy ? (
         <button
           id="skip-animation-btn"
