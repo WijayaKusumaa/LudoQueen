@@ -8,12 +8,15 @@ export interface Settings {
 }
 
 const KEY = 'olivias-little-island:settings';
-const DEFAULTS: Settings = { sound: true, music: false, reducedMotion: null };
+const DEFAULTS: Settings = { sound: true, music: false, reducedMotion: false };
 
 function load(): Settings {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return { ...DEFAULTS, ...(JSON.parse(raw) as Partial<Settings>) };
+    if (raw) {
+      const parsed = JSON.parse(raw) as Partial<Settings>;
+      return { ...DEFAULTS, ...parsed, reducedMotion: parsed.reducedMotion === true };
+    }
   } catch {
     /* storage tidak tersedia / rusak: pakai default */
   }
@@ -22,14 +25,6 @@ function load(): Settings {
 
 export function useSettings() {
   const [settings, setSettings] = useState<Settings>(load);
-  const [system, setSystem] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const on = () => setSystem(mq.matches);
-    mq.addEventListener('change', on);
-    return () => mq.removeEventListener('change', on);
-  }, []);
 
   useEffect(() => {
     try {
@@ -41,5 +36,5 @@ export function useSettings() {
 
   const update = useCallback((patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch })), []);
 
-  return { settings, update, reducedMotion: settings.reducedMotion ?? system };
+  return { settings, update, reducedMotion: settings.reducedMotion === true };
 }

@@ -61,12 +61,12 @@ export type Step = DiceStep | PauseStep | HopStep | CaptureStep;
 type MovingStep = HopStep | CaptureStep;
 
 export const TIMING = {
-  dice: 650,
-  hop: 180,
-  enter: 260,
-  home: 320,
-  capture: 420,
-  pause: 550,
+  dice: 750,
+  hop: 200,
+  enter: 300,
+  home: 360,
+  capture: 480,
+  pause: 650,
 } as const;
 
 const ARC = { hop: 0.2, enter: 0.3, home: 0.3, capture: 0.5 } as const;

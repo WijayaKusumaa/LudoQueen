@@ -100,7 +100,7 @@ export function useBotTurnRunner({ enabled, mode, botColors, animate }: BotTurnR
     if (!isBotTurn) return;
 
     if (state.phase === 'awaitingRoll') {
-      const delay = animate ? 650 : 80;
+      const delay = animate ? 950 : 80;
       const timer = setTimeout(() => {
         roll();
       }, delay);
@@ -108,7 +108,7 @@ export function useBotTurnRunner({ enabled, mode, botColors, animate }: BotTurnR
     }
 
     if (state.phase === 'awaitingMove' && selectablePawns.length > 0) {
-      const delay = animate ? 600 : 80;
+      const delay = animate ? 850 : 80;
       const timer = setTimeout(() => {
         const bestPawn = chooseBestPawn(state, selectablePawns);
         move(bestPawn);
