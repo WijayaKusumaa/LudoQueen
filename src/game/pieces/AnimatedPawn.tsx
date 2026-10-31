@@ -29,10 +29,79 @@ import { makeBlobShadowTexture } from '../board/boardTextures';
 import { PLAYER_THEME } from '../palette';
 import { useTap } from '../interaction/useTap';
 import type { PresentationController } from '../animation/presentation';
+import { useCustomization, type PawnSkinDef, type PawnSkinId } from '../customization';
 
 // ─── Shared geometry / material cache ────────────────────────────────────────
 
-function buildPawnGeometry(): BufferGeometry {
+function buildPawnGeometry(skinId: PawnSkinId): BufferGeometry {
+  if (skinId === 'crystal') {
+    // Siluet kristal bersegi (faceted gem)
+    const profile = [
+      new Vector2(0.001, 0),
+      new Vector2(0.28, 0),
+      new Vector2(0.32, 0.08),
+      new Vector2(0.2, 0.25),
+      new Vector2(0.24, 0.44),
+      new Vector2(0.14, 0.62),
+      new Vector2(0.001, 0.84),
+    ];
+    return new LatheGeometry(profile, 8);
+  }
+  if (skinId === 'robot') {
+    // Siluet robot bertingkat mekanis
+    const profile = [
+      new Vector2(0.001, 0),
+      new Vector2(0.31, 0),
+      new Vector2(0.31, 0.08),
+      new Vector2(0.22, 0.09),
+      new Vector2(0.22, 0.34),
+      new Vector2(0.26, 0.35),
+      new Vector2(0.26, 0.48),
+      new Vector2(0.12, 0.49),
+      new Vector2(0.2, 0.52),
+      new Vector2(0.2, 0.74),
+      new Vector2(0.04, 0.75),
+      new Vector2(0.04, 0.85),
+      new Vector2(0.001, 0.85),
+    ];
+    return new LatheGeometry(profile, 16);
+  }
+  if (skinId === 'knight') {
+    // Siluet ksatria berkerah pelindung & mahkota
+    const profile = new SplineCurve([
+      new Vector2(0.001, 0),
+      new Vector2(0.32, 0),
+      new Vector2(0.33, 0.06),
+      new Vector2(0.26, 0.14),
+      new Vector2(0.18, 0.34),
+      new Vector2(0.26, 0.44),
+      new Vector2(0.14, 0.5),
+      new Vector2(0.2, 0.66),
+      new Vector2(0.15, 0.8),
+      new Vector2(0.001, 0.86),
+    ]).getPoints(48);
+    return new LatheGeometry(profile, 32);
+  }
+  if (skinId === 'cute') {
+    // Siluet bulat chubby dengan kepala besar
+    const profile = new SplineCurve([
+      new Vector2(0.001, 0),
+      new Vector2(0.28, 0),
+      new Vector2(0.3, 0.08),
+      new Vector2(0.26, 0.24),
+      new Vector2(0.16, 0.38),
+      new Vector2(0.001, 0.42),
+    ]).getPoints(36);
+    const body = new LatheGeometry(profile, 36);
+    const head = new SphereGeometry(0.23, 32, 24);
+    head.translate(0, 0.58, 0);
+    const merged = mergeGeometries([body, head]);
+    body.dispose();
+    head.dispose();
+    return merged;
+  }
+
+  // 'classic' & 'neon'
   const profile = new SplineCurve([
     new Vector2(0.001, 0),
     new Vector2(0.3, 0),
@@ -53,14 +122,21 @@ function buildPawnGeometry(): BufferGeometry {
   return merged;
 }
 
-let _pawnGeo: BufferGeometry | null = null;
+const _pawnGeos = new Map<PawnSkinId, BufferGeometry>();
 let _blobGeo: CircleGeometry | null = null;
 let _blobMat: MeshBasicMaterial | null = null;
 let _ringGeo: RingGeometry | null = null;
-const _paints = new Map<PlayerColor, MeshPhysicalMaterial>();
+const _paints = new Map<string, MeshPhysicalMaterial>();
 const _selectMats = new Map<PlayerColor, MeshBasicMaterial>();
 
-function getPawnGeo()   { return (_pawnGeo ??= buildPawnGeometry()); }
+function getPawnGeo(skinId: PawnSkinId): BufferGeometry {
+  let g = _pawnGeos.get(skinId);
+  if (!g) {
+    g = buildPawnGeometry(skinId);
+    _pawnGeos.set(skinId, g);
+  }
+  return g;
+}
 function getBlobGeo()   { return (_blobGeo ??= new CircleGeometry(0.46, 32)); }
 function getBlobMat()   {
   return (_blobMat ??= new MeshBasicMaterial({
@@ -74,17 +150,21 @@ function getRingGeo()   {
   return (_ringGeo ??= new RingGeometry(0.44, 0.62, 40));
 }
 
-function getPaint(color: PlayerColor): MeshPhysicalMaterial {
-  let m = _paints.get(color);
+function getPaint(color: PlayerColor, pawnDef: PawnSkinDef): MeshPhysicalMaterial {
+  const key = `${color}:${pawnDef.id}`;
+  let m = _paints.get(key);
   if (!m) {
     m = new MeshPhysicalMaterial({
       color: PLAYER_THEME[color].main,
-      roughness: 0.4,
-      metalness: 0,
-      clearcoat: 0.3,
-      clearcoatRoughness: 0.45,
+      emissive: PLAYER_THEME[color].main,
+      emissiveIntensity: pawnDef.style.emissiveBoost,
+      roughness: pawnDef.style.roughness,
+      metalness: pawnDef.style.metalness,
+      clearcoat: pawnDef.style.clearcoat,
+      clearcoatRoughness: 0.25,
+      flatShading: pawnDef.id === 'crystal',
     });
-    _paints.set(color, m);
+    _paints.set(key, m);
   }
   return m;
 }
@@ -136,6 +216,7 @@ export function AnimatedPawn({
   celebrate,
   onSelect,
 }: AnimatedPawnProps) {
+  const { pawnDef } = useCustomization();
   const groupRef = useRef<Group>(null!);
   const ringRef = useRef<Mesh>(null!);
   const hovered = useRef(false);
@@ -218,7 +299,7 @@ export function AnimatedPawn({
       )}
 
       {/* Pion */}
-      <mesh geometry={getPawnGeo()} material={getPaint(color)} castShadow receiveShadow />
+      <mesh geometry={getPawnGeo(pawnDef.id)} material={getPaint(color, pawnDef)} castShadow receiveShadow />
 
       {/* Area sentuh lebih besar (jari) — hanya saat bisa dipilih */}
       {selectable && (

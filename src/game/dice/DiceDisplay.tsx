@@ -30,6 +30,7 @@ import type { PresentationController } from '../animation/presentation';
 import { PLAYER_THEME } from '../palette';
 import { useTap } from '../interaction/useTap';
 import { registerCanvasTexture } from '../board/boardTextures';
+import { useCustomization, type DiceSkinDef } from '../customization';
 
 // ─── Dot texture generator ────────────────────────────────────────────────────
 
@@ -43,10 +44,11 @@ const DOT_POSITIONS: Record<number, Array<[number, number]>> = {
   6: [[0.25, 0.2], [0.75, 0.2], [0.25, 0.5], [0.75, 0.5], [0.25, 0.8], [0.75, 0.8]],
 };
 
-const faceTextureCache = new Map<number, CanvasTexture>();
+const faceTextureCache = new Map<string, CanvasTexture>();
 
-function makeFaceTexture(value: number): CanvasTexture {
-  let t = faceTextureCache.get(value);
+function makeFaceTexture(value: number, skin: DiceSkinDef): CanvasTexture {
+  const key = `${skin.id}:${value}`;
+  let t = faceTextureCache.get(key);
   if (t) return t;
 
   const S = 128;
@@ -54,11 +56,16 @@ function makeFaceTexture(value: number): CanvasTexture {
   canvas.width = canvas.height = S;
   const ctx = canvas.getContext('2d')!;
 
-  ctx.fillStyle = '#fef9ec';
+  ctx.fillStyle = skin.colors.body;
   ctx.fillRect(0, 0, S, S);
 
-  ctx.fillStyle = '#1a1008';
-  const r = S * 0.085;
+  // Bingkai halus pada permukaan dadu
+  ctx.strokeStyle = skin.colors.border;
+  ctx.lineWidth = 6;
+  ctx.strokeRect(3, 3, S - 6, S - 6);
+
+  ctx.fillStyle = value === 1 ? skin.colors.pipOne : skin.colors.pip;
+  const r = value === 1 ? S * 0.115 : S * 0.085;
   for (const [u, v] of DOT_POSITIONS[value] ?? []) {
     ctx.beginPath();
     ctx.arc(u * S, v * S, r, 0, Math.PI * 2);
@@ -66,7 +73,7 @@ function makeFaceTexture(value: number): CanvasTexture {
   }
 
   t = new CanvasTexture(canvas);
-  faceTextureCache.set(value, t);
+  faceTextureCache.set(key, t);
   return registerCanvasTexture(t);
 }
 
@@ -106,6 +113,7 @@ export interface DiceDisplayProps {
 }
 
 export function DiceDisplay({ value, player, canRoll, animate, presentation, onRoll }: DiceDisplayProps) {
+  const { diceDef } = useCustomization();
   const groupRef = useRef<Group>(null!);
   const ringRef = useRef<Mesh>(null!);
   const hovered = useRef(false);
@@ -114,25 +122,28 @@ export function DiceDisplay({ value, player, canRoll, animate, presentation, onR
   const spin = useMemo(() => new Quaternion(), []);
   const euler = useMemo(() => new Euler(), []);
 
-  const faceTextures = useMemo(() => [1, 2, 3, 4, 5, 6].map(makeFaceTexture), []);
-  const diceGeo = useMemo(() => new RoundedBoxGeometry(SIZE, SIZE, SIZE, 4, 0.09), []);
-  const diceMaterials = useMemo(
-    () => [
-      // +X: face 4
-      new MeshPhysicalMaterial({ color: '#fef9ec', map: faceTextures[3], roughness: 0.35 }),
-      // -X: face 3
-      new MeshPhysicalMaterial({ color: '#fef9ec', map: faceTextures[2], roughness: 0.35 }),
-      // +Y: face 1
-      new MeshPhysicalMaterial({ color: '#fef9ec', map: faceTextures[0], roughness: 0.35 }),
-      // -Y: face 6
-      new MeshPhysicalMaterial({ color: '#fef9ec', map: faceTextures[5], roughness: 0.35 }),
-      // +Z: face 5
-      new MeshPhysicalMaterial({ color: '#fef9ec', map: faceTextures[4], roughness: 0.35 }),
-      // -Z: face 2
-      new MeshPhysicalMaterial({ color: '#fef9ec', map: faceTextures[1], roughness: 0.35 }),
-    ],
-    [faceTextures],
+  const faceTextures = useMemo(
+    () => [1, 2, 3, 4, 5, 6].map((v) => makeFaceTexture(v, diceDef)),
+    [diceDef],
   );
+  const diceGeo = useMemo(() => new RoundedBoxGeometry(SIZE, SIZE, SIZE, 4, 0.09), []);
+  const diceMaterials = useMemo(() => {
+    const { roughness, metalness } = diceDef.colors;
+    return [
+      // +X: face 4
+      new MeshPhysicalMaterial({ color: '#ffffff', map: faceTextures[3], roughness, metalness }),
+      // -X: face 3
+      new MeshPhysicalMaterial({ color: '#ffffff', map: faceTextures[2], roughness, metalness }),
+      // +Y: face 1
+      new MeshPhysicalMaterial({ color: '#ffffff', map: faceTextures[0], roughness, metalness }),
+      // -Y: face 6
+      new MeshPhysicalMaterial({ color: '#ffffff', map: faceTextures[5], roughness, metalness }),
+      // +Z: face 5
+      new MeshPhysicalMaterial({ color: '#ffffff', map: faceTextures[4], roughness, metalness }),
+      // -Z: face 2
+      new MeshPhysicalMaterial({ color: '#ffffff', map: faceTextures[1], roughness, metalness }),
+    ];
+  }, [faceTextures, diceDef]);
 
   const ringGeo = useMemo(() => new RingGeometry(0.62, 0.78, 40), []);
   const ringMat = useMemo(

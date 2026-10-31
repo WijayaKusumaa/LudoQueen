@@ -10,7 +10,8 @@ import {
   gridToWorld,
 } from './boardCoordinates';
 import { makeGrassTexture } from './boardTextures';
-import { PALETTE, PLAYER_THEME } from '../palette';
+import { PLAYER_THEME } from '../palette';
+import { useCustomization } from '../customization';
 
 function useGrass(repeatX: number, repeatY: number): Texture {
   return useMemo(() => {
@@ -26,6 +27,7 @@ const SOIL_H = 0.42;
 
 /** Lempeng terrain: lapisan rumput bertepi bulat di atas lapisan tanah. */
 function Slab({ width, depth, grass }: { width: number; depth: number; grass: Texture }) {
+  const { arenaDef } = useCustomization();
   return (
     <group>
       <RoundedBox
@@ -36,7 +38,7 @@ function Slab({ width, depth, grass }: { width: number; depth: number; grass: Te
         receiveShadow
         castShadow
       >
-        <meshStandardMaterial color={PALETTE.grassLight} map={grass} roughness={0.95} />
+        <meshStandardMaterial color={arenaDef.colors.grass} map={grass} roughness={0.95} />
       </RoundedBox>
       <RoundedBox
         args={[width - 0.16, SOIL_H, depth - 0.16]}
@@ -45,7 +47,7 @@ function Slab({ width, depth, grass }: { width: number; depth: number; grass: Te
         position={[0, HEIGHTS.groundTop - GRASS_H - SOIL_H / 2 + 0.02, 0]}
         receiveShadow
       >
-        <meshStandardMaterial color={PALETTE.soil} roughness={1} />
+        <meshStandardMaterial color={arenaDef.colors.soil} roughness={1} />
       </RoundedBox>
     </group>
   );

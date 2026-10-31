@@ -3,7 +3,8 @@ import { Color, InstancedMesh, Matrix4 } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { buildBoardCells } from './boardLayout';
 import { HEIGHTS, TILE_SIZE, gridToWorld } from './boardCoordinates';
-import { PALETTE, PLAYER_THEME } from '../palette';
+import { PLAYER_THEME } from '../palette';
+import { useCustomization } from '../customization';
 
 /** Variasi deterministik 0..1 per sel agar ubin tidak seragam. */
 function cellNoise(col: number, row: number): number {
@@ -14,6 +15,7 @@ function cellNoise(col: number, row: number): number {
 /** Seluruh ubin jalur dan lane dalam satu InstancedMesh dengan geometri bersama. */
 export function BoardTiles() {
   const ref = useRef<InstancedMesh>(null);
+  const { arenaDef } = useCustomization();
   const cells = useMemo(() => buildBoardCells(), []);
   const geometry = useMemo(() => {
     const height = 0.2;
@@ -26,8 +28,8 @@ export function BoardTiles() {
     const mesh = ref.current;
     if (!mesh) return;
     const m = mesh;
-    const stone = new Color(PALETTE.stone);
-    const shade = new Color(PALETTE.stoneShade);
+    const stone = new Color(arenaDef.colors.tileLight);
+    const shade = new Color(arenaDef.colors.tileShade);
     const tmp = new Color();
     const matrix = new Matrix4();
     cells.forEach((c, i) => {
@@ -45,7 +47,7 @@ export function BoardTiles() {
     });
     m.instanceMatrix.needsUpdate = true;
     if (m.instanceColor) m.instanceColor.needsUpdate = true;
-  }, [cells, geometry]);
+  }, [cells, geometry, arenaDef]);
 
   return (
     <instancedMesh ref={ref} args={[geometry, undefined, cells.length]} castShadow receiveShadow>

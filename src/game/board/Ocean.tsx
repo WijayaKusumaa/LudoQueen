@@ -1,8 +1,9 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Color, ShaderMaterial } from 'three';
 import { ARM_HALF_WIDTH, BASE_ISLAND_SIZE, HEIGHTS, ISLAND_HALF_EXTENT } from './boardCoordinates';
 import { PALETTE } from '../palette';
+import { useCustomization } from '../customization';
 
 const vertex = /* glsl */ `
   varying vec2 vP;
@@ -63,6 +64,7 @@ const fragment = /* glsl */ `
 /** Permukaan laut toska. Gerak halus lewat shader; membeku bila reduced-motion. */
 export function Ocean({ animate }: { animate: boolean }) {
   const ref = useRef<ShaderMaterial>(null);
+  const { arenaDef } = useCustomization();
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
@@ -72,6 +74,11 @@ export function Ocean({ animate }: { animate: boolean }) {
     }),
     [],
   );
+  useEffect(() => {
+    uniforms.uShallow.value.set(arenaDef.colors.oceanShallow);
+    uniforms.uDeep.value.set(arenaDef.colors.oceanDeep);
+    uniforms.uFoam.value.set(arenaDef.colors.foam);
+  }, [arenaDef, uniforms]);
   useFrame((_, dt) => {
     if (animate && ref.current) {
       const u = ref.current.uniforms['uTime'];

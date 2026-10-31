@@ -1,5 +1,6 @@
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import { GameProvider, useGame } from '../game/store/GameContext';
+import { CustomizationProvider } from '../game/customization';
 import { GameHUD } from '../components/ui/GameHUD';
 import { SettingsPanel, SetupScreen, TitleScreen } from '../components/ui/Menus';
 import { SceneErrorBoundary, WebGLFallback, isWebGLAvailable } from '../components/ui/SceneFallback';
@@ -63,7 +64,7 @@ function Shell({ animate, settings: s }: ShellProps) {
       {screen === 'title' && (
         <TitleScreen
           canResume={started && state.phase !== 'finished'}
-          onPlay={() => setScreen('setup')}
+          onPlay={start}
           onResume={() => setScreen('playing')}
           onSettings={() => setSettingsOpen(true)}
         />
@@ -101,8 +102,10 @@ export function App() {
   if (!webgl) return <WebGLFallback />;
 
   return (
-    <GameProvider animate={animate}>
-      <Shell animate={animate} settings={settings} />
-    </GameProvider>
+    <CustomizationProvider>
+      <GameProvider animate={animate}>
+        <Shell animate={animate} settings={settings} />
+      </GameProvider>
+    </CustomizationProvider>
   );
 }

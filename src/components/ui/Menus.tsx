@@ -1,13 +1,23 @@
 /**
- * Menus.tsx — layar judul, setup pemain, dan panel pengaturan.
- * Semua kontrol berupa <button> asli (bisa difokus keyboard, target sentuh ≥ 44px).
+ * Menus.tsx — Main Menu (Pusat Kustomisasi Arena, Dice, & Pawn), Setup Pemain, dan Panel Pengaturan.
+ * Semua kontrol berupa <button> asli (bisa difokus keyboard, target sentuh >= 44px).
  */
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { PLAYER_ORDER, type PlayerColor } from '../../game/board/boardLayout';
 import { PLAYER_THEME } from '../../game/palette';
 import { PERSONAL } from '../../config/personal';
 import type { Settings } from '../../app/useSettings';
+import {
+  ARENA_CATALOG,
+  DICE_CATALOG,
+  PAWN_CATALOG,
+  useCustomization,
+  type ArenaSkinDef,
+  type CustomizationCategory,
+  type DiceSkinDef,
+  type PawnSkinDef,
+} from '../../game/customization';
 
 /** Escape menutup, Tab berputar di dalam dialog, fokus awal ke elemen pertama. */
 function useDialogFocus(onClose?: () => void) {
@@ -17,7 +27,11 @@ function useDialogFocus(onClose?: () => void) {
     if (!root) return;
     const previous = document.activeElement as HTMLElement | null;
     const focusables = () =>
-      Array.from(root.querySelectorAll<HTMLElement>('button:not(:disabled), [href], input, [tabindex]:not([tabindex="-1"])'));
+      Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), [href], input, [tabindex]:not([tabindex="-1"])',
+        ),
+      );
     (root.querySelector<HTMLElement>('[data-autofocus]') ?? focusables()[0])?.focus();
 
     const onKey = (e: KeyboardEvent) => {
@@ -56,39 +70,175 @@ function Screen({ label, children, onClose }: { label: string; children: ReactNo
   );
 }
 
-// ─── Daftar Arena Game (siap dikembangkan untuk pilihan arena ke depannya) ───
+// ─── Komponen Preview Visual Item ─────────────────────────────────────────────
 
-export interface ArenaItem {
-  readonly id: string;
-  readonly title: string;
-  readonly subtitle: string;
-  readonly theme: 'green' | 'cyan' | 'purple';
-  readonly locked?: boolean;
+function ArenaPreviewSvg({ arena }: { arena: ArenaSkinDef }) {
+  const { colors } = arena;
+  return (
+    <svg viewBox="0 0 180 120" className="cust-preview-svg cust-preview-svg--arena" aria-hidden="true">
+      <defs>
+        <linearGradient id={`sea-${arena.id}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor={colors.oceanShallow} />
+          <stop offset="100%" stopColor={colors.oceanDeep} />
+        </linearGradient>
+      </defs>
+      {/* Laut / Background Arena */}
+      <rect x="2" y="2" width="176" height="116" rx="14" fill={`url(#sea-${arena.id})`} />
+      {/* Efek Buih Laut */}
+      <rect
+        x="18"
+        y="12"
+        width="144"
+        height="96"
+        rx="16"
+        fill="none"
+        stroke={colors.foam}
+        strokeWidth="2.5"
+        strokeDasharray="8 5"
+        opacity="0.65"
+      />
+      {/* Lapisan Tanah & Rumput Pulau */}
+      <rect x="24" y="18" width="132" height="88" rx="12" fill={colors.soil} />
+      <rect x="24" y="14" width="132" height="86" rx="12" fill={colors.grass} />
+
+      {/* Jalur Salib Ubin Ludo */}
+      <rect x="74" y="16" width="32" height="82" rx="3" fill={colors.tileLight} stroke={colors.tileShade} strokeWidth="1.5" />
+      <rect x="28" y="43" width="124" height="28" rx="3" fill={colors.tileLight} stroke={colors.tileShade} strokeWidth="1.5" />
+
+      {/* Jalur Home 4 Warna */}
+      <rect x="34" y="53" width="38" height="8" rx="2" fill="#eab308" />
+      <rect x="86" y="21" width="8" height="22" rx="2" fill="#3b82f6" />
+      <rect x="108" y="53" width="38" height="8" rx="2" fill="#ef4444" />
+      <rect x="86" y="71" width="8" height="22" rx="2" fill="#22c55e" />
+
+      {/* 4 Base Pemain */}
+      <rect x="30" y="19" width="38" height="21" rx="5" fill="#eab308" stroke="#a16207" strokeWidth="1.5" />
+      <rect x="112" y="19" width="38" height="21" rx="5" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="1.5" />
+      <rect x="112" y="74" width="38" height="21" rx="5" fill="#ef4444" stroke="#b91c1c" strokeWidth="1.5" />
+      <rect x="30" y="74" width="38" height="21" rx="5" fill="#22c55e" stroke="#15803d" strokeWidth="1.5" />
+
+      {/* Pusat Papan */}
+      <rect x="76" y="45" width="28" height="24" rx="3" fill="#ffffff" stroke={colors.tileShade} strokeWidth="1.5" />
+      <circle cx="90" cy="57" r="6" fill="#facc15" />
+    </svg>
+  );
 }
 
-export const GAME_ARENAS: readonly ArenaItem[] = [
-  {
-    id: 'classic-island',
-    title: 'Pulau Klasik',
-    subtitle: '2–4 Pemain',
-    theme: 'green',
-  },
-  {
-    id: 'team-2v2',
-    title: '2 vs. 2',
-    subtitle: 'Arena Tim',
-    theme: 'cyan',
-  },
-  {
-    id: 'royal-arena',
-    title: 'Arena Kerajaan',
-    subtitle: 'Segera Hadir',
-    theme: 'purple',
-    locked: true,
-  },
-];
+function DicePreviewSvg({ dice }: { dice: DiceSkinDef }) {
+  const { body, pip, pipOne, border } = dice.colors;
+  return (
+    <svg viewBox="0 0 100 100" className="cust-preview-svg cust-preview-svg--dice" aria-hidden="true">
+      {/* Bayangan Bawah */}
+      <ellipse cx="50" cy="86" rx="28" ry="7" fill="rgba(15, 23, 42, 0.28)" />
+      {/* Badan Dadu 3D Miring */}
+      <g transform="rotate(-10 50 48)">
+        <rect
+          x="18"
+          y="16"
+          width="64"
+          height="64"
+          rx="16"
+          fill={body}
+          stroke={border}
+          strokeWidth="4"
+        />
+        {/* Kilau Atas */}
+        <path
+          d="M26 22h48a8 8 0 0 1 8 8v10c-18 6-46 6-64 0V30a8 8 0 0 1 8-8z"
+          fill="rgba(255,255,255,0.28)"
+        />
+        {/* Mata Dadu (5 Pips dengan Pip Tengah Spesial) */}
+        <circle cx="34" cy="32" r="5" fill={pip} />
+        <circle cx="66" cy="32" r="5" fill={pip} />
+        <circle cx="50" cy="48" r="6.5" fill={pipOne} />
+        <circle cx="34" cy="64" r="5" fill={pip} />
+        <circle cx="66" cy="64" r="5" fill={pip} />
+      </g>
+    </svg>
+  );
+}
 
-// ─── Layar judul (Lobby Utama bergaya Ludo Modern) ───────────────────────────
+function PawnPreviewSvg({ pawn }: { pawn: PawnSkinDef }) {
+  return (
+    <svg viewBox="0 0 100 100" className="cust-preview-svg cust-preview-svg--pawn" aria-hidden="true">
+      {/* Bayangan Bawah */}
+      <ellipse cx="50" cy="84" rx="26" ry="6" fill="rgba(15, 23, 42, 0.28)" />
+
+      {/* 4 Titik Identitas Warna Ludo di Sudut Bawah */}
+      <circle cx="22" cy="82" r="5" fill="#ef4444" stroke="#ffffff" strokeWidth="1.5" />
+      <circle cx="35" cy="86" r="5" fill="#3b82f6" stroke="#ffffff" strokeWidth="1.5" />
+      <circle cx="65" cy="86" r="5" fill="#22c55e" stroke="#ffffff" strokeWidth="1.5" />
+      <circle cx="78" cy="82" r="5" fill="#eab308" stroke="#ffffff" strokeWidth="1.5" />
+
+      {pawn.id === 'classic' && (
+        <g>
+          <path d="M30 76c2-16 10-26 14-36h12c4 10 12 20 14 36H30z" fill="#3b82f6" stroke="#1e3a8a" strokeWidth="3" />
+          <ellipse cx="50" cy="76" rx="22" ry="5" fill="#1d4ed8" stroke="#1e3a8a" strokeWidth="2.5" />
+          <circle cx="50" cy="30" r="14" fill="#60a5fa" stroke="#1e3a8a" strokeWidth="3" />
+          <circle cx="45" cy="25" r="4" fill="rgba(255,255,255,0.65)" />
+        </g>
+      )}
+
+      {pawn.id === 'crystal' && (
+        <g>
+          <polygon points="50,12 68,34 62,76 38,76 32,34" fill="#38bdf8" stroke="#0369a1" strokeWidth="3" />
+          <polygon points="50,12 50,76 38,76 32,34" fill="#7dd3fc" opacity="0.65" />
+          <polygon points="50,12 68,34 50,44 32,34" fill="#bae6fd" opacity="0.75" />
+        </g>
+      )}
+
+      {pawn.id === 'robot' && (
+        <g>
+          <rect x="32" y="46" width="36" height="30" rx="5" fill="#64748b" stroke="#1e293b" strokeWidth="3" />
+          <rect x="38" y="53" width="24" height="14" rx="3" fill="#38bdf8" />
+          <rect x="34" y="22" width="32" height="22" rx="6" fill="#94a3b8" stroke="#1e293b" strokeWidth="3" />
+          <rect x="40" y="29" width="20" height="7" rx="3" fill="#22d3ee" />
+          <line x1="50" y1="12" x2="50" y2="22" stroke="#1e293b" strokeWidth="3" />
+          <circle cx="50" cy="11" r="4" fill="#ef4444" />
+        </g>
+      )}
+
+      {pawn.id === 'knight' && (
+        <g>
+          <path d="M32 76l5-34 13-8 13 8 5 34H32z" fill="#eab308" stroke="#713f12" strokeWidth="3" />
+          <polygon points="34,26 42,14 50,22 58,14 66,26 62,38 38,38" fill="#facc15" stroke="#713f12" strokeWidth="2.8" />
+          <circle cx="50" cy="31" r="3.5" fill="#dc2626" />
+        </g>
+      )}
+
+      {pawn.id === 'neon' && (
+        <g>
+          <path d="M31 76c3-16 10-26 13-36h12c3 10 10 20 13 36H31z" fill="#1e1b4b" stroke="#22d3ee" strokeWidth="3.5" />
+          <circle cx="50" cy="29" r="14" fill="#1e1b4b" stroke="#f43f5e" strokeWidth="3.5" />
+          <ellipse cx="50" cy="58" rx="14" ry="4" fill="none" stroke="#a855f7" strokeWidth="3" />
+          <circle cx="50" cy="29" r="6" fill="#22d3ee" />
+        </g>
+      )}
+
+      {pawn.id === 'cute' && (
+        <g>
+          <path d="M32 76c0-14 8-24 18-24s18 10 18 24H32z" fill="#f472b6" stroke="#831843" strokeWidth="3" />
+          <circle cx="37" cy="22" r="7" fill="#f472b6" stroke="#831843" strokeWidth="2.5" />
+          <circle cx="63" cy="22" r="7" fill="#f472b6" stroke="#831843" strokeWidth="2.5" />
+          <circle cx="50" cy="36" r="18" fill="#fbcfe8" stroke="#831843" strokeWidth="3" />
+          <circle cx="43" cy="35" r="3" fill="#1e293b" />
+          <circle cx="57" cy="35" r="3" fill="#1e293b" />
+          <path d="M46 42c2 2 6 2 8 0" stroke="#1e293b" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+        </g>
+      )}
+    </svg>
+  );
+}
+
+// ─── Layar Utama: Main Menu & Kustomisasi (Arena, Dice, Pawn) ─────────────────
+
+interface PendingPurchase {
+  readonly category: CustomizationCategory;
+  readonly id: string;
+  readonly name: string;
+  readonly subtitle: string;
+  readonly price: number;
+}
 
 export function TitleScreen(props: {
   canResume: boolean;
@@ -97,241 +247,310 @@ export function TitleScreen(props: {
   onSettings: () => void;
 }) {
   const ref = useDialogFocus();
+  const { state, arenaDef, diceDef, pawnDef, selectItem, buyItem } = useCustomization();
+  const [activeTab, setActiveTab] = useState<CustomizationCategory>('arena');
+  const [pendingBuy, setPendingBuy] = useState<PendingPurchase | null>(null);
+  const [buyError, setBuyError] = useState<string | null>(null);
+
+  const handleCardClick = (
+    category: CustomizationCategory,
+    id: string,
+    name: string,
+    subtitle: string,
+    price: number,
+  ) => {
+    const isOwned = (state.owned[category] as readonly string[]).includes(id);
+    if (isOwned) {
+      selectItem(category, id);
+      return;
+    }
+    setBuyError(null);
+    setPendingBuy({ category, id, name, subtitle, price });
+  };
+
+  const confirmPurchase = () => {
+    if (!pendingBuy) return;
+    const res = buyItem(pendingBuy.category, pendingBuy.id);
+    if (res.ok) {
+      setPendingBuy(null);
+      setBuyError(null);
+    } else if (res.reason === 'INSUFFICIENT_COINS') {
+      setBuyError('Koin kamu belum mencukupi untuk membeli item ini.');
+    }
+  };
 
   return (
-    <div className="lobby" role="dialog" aria-modal="true" aria-label={PERSONAL.title} ref={ref}>
-      {/* ── Top Bar: Profil, Level, Koin, Cash, & Pengaturan ── */}
-      <header className="lobby-topbar">
-        <div className="lobby-profile">
-          <div className="lobby-profile__avatar" aria-hidden="true">
-            <svg viewBox="0 0 40 40" className="lobby-profile__avatar-svg">
-              <rect width="40" height="40" rx="8" fill="#ffe4c4" />
-              <circle cx="20" cy="15" r="8" fill="#5c3a21" />
-              <circle cx="20" cy="16" r="6.5" fill="#f5cfa0" />
-              <circle cx="17.5" cy="15" r="1" fill="#2c1d11" />
-              <circle cx="22.5" cy="15" r="1" fill="#2c1d11" />
-              <path d="M17.5 18.5c1.5 1.2 3.5 1.2 5 0" stroke="#2c1d11" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-              <path d="M9 38c0-6 5-10 11-10s11 4 11 10" fill="#ffffff" />
-            </svg>
-          </div>
-          <div className="lobby-profile__info">
-            <span className="lobby-profile__name">{PERSONAL.recipient}</span>
-            <div className="lobby-profile__xp-bar">
-              <span className="lobby-profile__star" aria-label="Level 1">1</span>
-              <div className="lobby-profile__xp-track">
-                <div className="lobby-profile__xp-fill" />
-              </div>
+    <div className="cust-menu" role="dialog" aria-modal="true" aria-label={PERSONAL.title} ref={ref}>
+      <div className="cust-menu__container">
+        {/* ── Header: Judul, Koin, & Pengaturan ── */}
+        <header className="cust-header">
+          <div className="cust-header__brand">
+            <span className="cust-header__logo-badge" aria-hidden="true">🎲</span>
+            <div>
+              <h1 className="cust-header__title">LUDO COLLECTION</h1>
+              <p className="cust-header__sub">{PERSONAL.title} · Pilih gaya permainanmu</p>
             </div>
           </div>
+
+          <div className="cust-header__right">
+            <div className="cust-coin-pill" aria-label={`Saldo koin: ${state.coins}`}>
+              <span className="cust-coin-pill__dot" aria-hidden="true">🪙</span>
+              <span className="cust-coin-pill__amount">{state.coins} Coins</span>
+            </div>
+
+            <button
+              type="button"
+              id="settings-btn"
+              className="cust-icon-btn"
+              onClick={props.onSettings}
+              aria-label="Pengaturan"
+              title="Pengaturan"
+            >
+              ⚙️
+            </button>
+          </div>
+        </header>
+
+        {/* ── Navigasi 3 Kategori Utama: Arena, Dice, Pawn (Tanpa Horse) ── */}
+        <nav className="cust-tabs" aria-label="Kategori Kustomisasi">
+          <button
+            type="button"
+            id="tab-arena"
+            className={`cust-tab${activeTab === 'arena' ? ' cust-tab--active' : ''}`}
+            onClick={() => setActiveTab('arena')}
+            aria-pressed={activeTab === 'arena'}
+          >
+            <span className="cust-tab__icon" aria-hidden="true">🗺️</span>
+            <span className="cust-tab__label">Arena</span>
+          </button>
+
+          <button
+            type="button"
+            id="tab-dice"
+            className={`cust-tab${activeTab === 'dice' ? ' cust-tab--active' : ''}`}
+            onClick={() => setActiveTab('dice')}
+            aria-pressed={activeTab === 'dice'}
+          >
+            <span className="cust-tab__icon" aria-hidden="true">🎲</span>
+            <span className="cust-tab__label">Dice</span>
+          </button>
+
+          <button
+            type="button"
+            id="tab-pawn"
+            className={`cust-tab${activeTab === 'pawn' ? ' cust-tab--active' : ''}`}
+            onClick={() => setActiveTab('pawn')}
+            aria-pressed={activeTab === 'pawn'}
+          >
+            <span className="cust-tab__icon" aria-hidden="true">♟️</span>
+            <span className="cust-tab__label">Pawn</span>
+          </button>
+        </nav>
+
+        {/* ── Katalog Item per Kategori ── */}
+        <div className="cust-catalog" role="region" aria-label={`Katalog ${activeTab}`}>
+          {activeTab === 'arena' && (
+            <div className="cust-grid cust-grid--arena">
+              {ARENA_CATALOG.map((arena) => {
+                const isOwned = state.owned.arena.includes(arena.id);
+                const isActive = state.selected.arena === arena.id;
+                return (
+                  <button
+                    key={arena.id}
+                    type="button"
+                    id={`item-arena-${arena.id}`}
+                    className={`cust-card cust-card--arena${isActive ? ' cust-card--active' : ''}${!isOwned ? ' cust-card--locked' : ''}`}
+                    onClick={() => handleCardClick('arena', arena.id, arena.name, arena.subtitle, arena.price)}
+                  >
+                    {arena.tag && (
+                      <span className={`cust-tag cust-tag--${arena.tag.toLowerCase()}`}>{arena.tag}</span>
+                    )}
+                    {isActive && (
+                      <span className="cust-check-badge" aria-hidden="true">✓</span>
+                    )}
+
+                    <div className="cust-card__preview cust-card__preview--arena">
+                      <ArenaPreviewSvg arena={arena} />
+                    </div>
+
+                    <div className="cust-card__info">
+                      <span className="cust-card__title">{arena.name}</span>
+                      <span className="cust-card__subtitle">{arena.subtitle}</span>
+
+                      {isActive ? (
+                        <span className="cust-status cust-status--active">Active</span>
+                      ) : isOwned ? (
+                        <span className="cust-status cust-status--owned">Owned</span>
+                      ) : (
+                        <span className="cust-status cust-status--price">🔒 {arena.price} Coins</span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {activeTab === 'dice' && (
+            <div className="cust-grid cust-grid--items">
+              {DICE_CATALOG.map((dice) => {
+                const isOwned = state.owned.dice.includes(dice.id);
+                const isActive = state.selected.dice === dice.id;
+                return (
+                  <button
+                    key={dice.id}
+                    type="button"
+                    id={`item-dice-${dice.id}`}
+                    className={`cust-card cust-card--item${isActive ? ' cust-card--active' : ''}${!isOwned ? ' cust-card--locked' : ''}`}
+                    onClick={() => handleCardClick('dice', dice.id, dice.name, dice.subtitle, dice.price)}
+                  >
+                    <div className="cust-card__header">
+                      <span className="cust-card__header-name">{dice.name.toUpperCase()}</span>
+                    </div>
+
+                    {dice.tag && (
+                      <span className={`cust-tag cust-tag--${dice.tag.toLowerCase()}`}>{dice.tag}</span>
+                    )}
+                    {isActive && (
+                      <span className="cust-check-badge" aria-hidden="true">✓</span>
+                    )}
+
+                    <div className="cust-card__preview cust-card__preview--item">
+                      <DicePreviewSvg dice={dice} />
+                    </div>
+
+                    <div className="cust-card__footer">
+                      {isActive ? (
+                        <span className="cust-status cust-status--active">Active</span>
+                      ) : isOwned ? (
+                        <span className="cust-status cust-status--owned">Owned</span>
+                      ) : (
+                        <span className="cust-status cust-status--price">🔒 {dice.price} Coins</span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {activeTab === 'pawn' && (
+            <div className="cust-grid cust-grid--items">
+              {PAWN_CATALOG.map((pawn) => {
+                const isOwned = state.owned.pawn.includes(pawn.id);
+                const isActive = state.selected.pawn === pawn.id;
+                return (
+                  <button
+                    key={pawn.id}
+                    type="button"
+                    id={`item-pawn-${pawn.id}`}
+                    className={`cust-card cust-card--item${isActive ? ' cust-card--active' : ''}${!isOwned ? ' cust-card--locked' : ''}`}
+                    onClick={() => handleCardClick('pawn', pawn.id, pawn.name, pawn.subtitle, pawn.price)}
+                  >
+                    <div className="cust-card__header">
+                      <span className="cust-card__header-name">{pawn.name.toUpperCase()}</span>
+                    </div>
+
+                    {pawn.tag && (
+                      <span className={`cust-tag cust-tag--${pawn.tag.toLowerCase()}`}>{pawn.tag}</span>
+                    )}
+                    {isActive && (
+                      <span className="cust-check-badge" aria-hidden="true">✓</span>
+                    )}
+
+                    <div className="cust-card__preview cust-card__preview--item">
+                      <PawnPreviewSvg pawn={pawn} />
+                    </div>
+
+                    <div className="cust-card__footer">
+                      {isActive ? (
+                        <span className="cust-status cust-status--active">Active</span>
+                      ) : isOwned ? (
+                        <span className="cust-status cust-status--owned">Owned</span>
+                      ) : (
+                        <span className="cust-status cust-status--price">🔒 {pawn.price} Coins</span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
-        <div className="lobby-currencies">
-          <div className="lobby-currency" aria-label="Koin: 26,484">
-            <span className="lobby-currency__icon lobby-currency__icon--coin" aria-hidden="true" />
-            <span className="lobby-currency__value">26,484</span>
-            <button type="button" className="lobby-currency__add" aria-label="Tambah koin" onClick={props.onPlay}>+</button>
+        {/* ── Footer: Ringkasan Pilihan Aktif & Tombol MAIN SEKARANG ── */}
+        <footer className="cust-footer">
+          <div className="cust-summary" aria-label="Pilihan Aktif Saat Ini">
+            <span className="cust-summary__chip">🗺️ {arenaDef.name}</span>
+            <span className="cust-summary__chip">🎲 {diceDef.name}</span>
+            <span className="cust-summary__chip">♟️ {pawnDef.name}</span>
           </div>
 
-          <div className="lobby-currency" aria-label="Permata: 41">
-            <span className="lobby-currency__icon lobby-currency__icon--cash" aria-hidden="true">💵</span>
-            <span className="lobby-currency__value">41</span>
-            <button type="button" className="lobby-currency__add" aria-label="Tambah uang" onClick={props.onPlay}>+</button>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          id="settings-btn"
-          className="lobby-settings-btn"
-          onClick={props.onSettings}
-          aria-label="Pengaturan"
-          title="Pengaturan"
-        >
-          ⚙️
-        </button>
-      </header>
-
-      {/* ── Area Tengah: Banner, Tombol Samping, Logo, & Pilihan Arena ── */}
-      <div className="lobby-main">
-        {/* Banner Klasifikasi + Tombol Samping */}
-        <div className="lobby-upper-grid">
-          {/* Kolom Kiri */}
-          <div className="lobby-side lobby-side--left">
-            <button type="button" className="lobby-side-btn lobby-side-btn--grey" title="Video Hadiah" onClick={props.onPlay}>
-              <span aria-hidden="true">🎬</span>
-            </button>
-            <button type="button" className="lobby-side-btn lobby-side-btn--blue" title="Hadiah Harian" onClick={props.onPlay}>
-              <span aria-hidden="true">🎁</span>
-            </button>
-            <button type="button" className="lobby-like-badge" onClick={props.onPlay}>
-              <span aria-hidden="true">👍</span> Suka
-            </button>
-            <button type="button" className="lobby-side-btn lobby-side-btn--blue" title="Mode Cepat" onClick={props.onPlay}>
-              <span aria-hidden="true">🎮</span>
-            </button>
-          </div>
-
-          {/* Tengah: Banner Klasifikasi + Logo LUDO */}
-          <div className="lobby-center-hero">
-            <div className="lobby-rank-banner">
-              <div className="lobby-rank-banner__emblem" aria-hidden="true">
-                🔒
-              </div>
-              <div className="lobby-rank-banner__text">
-                <div className="lobby-rank-banner__title">Klasifikasi</div>
-                <div className="lobby-rank-banner__sub">Terbuka di level 5</div>
-              </div>
-            </div>
-
-            {/* Logo Dadu & LUDO */}
-            <div className="lobby-logo">
-              <div className="lobby-logo__dice" aria-hidden="true">
-                <svg viewBox="0 0 64 64" className="lobby-logo__dice-svg">
-                  <rect x="8" y="8" width="48" height="48" rx="11" fill="#f8fafc" stroke="#1e293b" strokeWidth="3.5" transform="rotate(-12 32 32)" />
-                  <circle cx="22" cy="20" r="3.6" fill="#0f172a" />
-                  <circle cx="38" cy="17" r="3.6" fill="#0f172a" />
-                  <circle cx="32" cy="31" r="3.6" fill="#0f172a" />
-                  <circle cx="25" cy="44" r="3.6" fill="#0f172a" />
-                  <circle cx="41" cy="41" r="3.6" fill="#0f172a" />
-                </svg>
-              </div>
-              <h1 className="lobby-logo__text">LUDO</h1>
-            </div>
-
+          <div className="cust-footer__actions">
             {props.canResume && (
               <button
                 type="button"
                 id="resume-btn"
-                className="lobby-resume-btn"
+                className="cust-resume-btn"
                 onClick={props.onResume}
               >
-                ▶ Lanjutkan Permainan
+                Lanjutkan
               </button>
             )}
-          </div>
-
-          {/* Kolom Kanan */}
-          <div className="lobby-side lobby-side--right">
-            <button type="button" className="lobby-side-btn lobby-side-btn--blue" title="Kunci Peti" onClick={props.onPlay}>
-              <span aria-hidden="true">🔑</span>
-            </button>
-            <button type="button" className="lobby-side-btn lobby-side-btn--blue" title="Celengan" onClick={props.onPlay}>
-              <span aria-hidden="true">🐷</span>
-            </button>
-            <button type="button" className="lobby-side-btn lobby-side-btn--grey" title="Jadwal Acara" onClick={props.onPlay}>
-              <span aria-hidden="true">📅</span>
+            <button
+              type="button"
+              id="play-btn"
+              className="cust-play-btn"
+              data-autofocus
+              onClick={props.onPlay}
+            >
+              MAIN SEKARANG
             </button>
           </div>
-        </div>
-
-        {/* ── Carousel Kartu Pilihan Arena Game ── */}
-        <section className="lobby-arenas" aria-label="Pilih Arena Permainan">
-          <div className="lobby-arenas__track">
-            {GAME_ARENAS.map((arena, idx) => {
-              const isPrimary = idx === 0;
-              return (
-                <button
-                  key={arena.id}
-                  type="button"
-                  id={isPrimary ? 'play-btn' : `arena-${arena.id}-btn`}
-                  data-autofocus={isPrimary ? true : undefined}
-                  className={`arena-card arena-card--${arena.theme}${arena.locked ? ' arena-card--locked' : ''}`}
-                  onClick={props.onPlay}
-                >
-                  <div className="arena-card__gloss" />
-                  <div className="arena-card__art" aria-hidden="true">
-                    {arena.theme === 'green' && (
-                      <svg viewBox="0 0 120 90" className="arena-card__svg">
-                        {/* Dua karakter & bola dunia/pulau seperti referensi */}
-                        <circle cx="40" cy="30" r="13" fill="#f5cfa0" stroke="#1e293b" strokeWidth="2.5" />
-                        <path d="M27 25c2-9 18-11 24-2" fill="#3b2314" />
-                        <path d="M24 62c0-10 7-17 16-17s16 7 16 17" fill="#f59e0b" stroke="#1e293b" strokeWidth="2.5" />
-                        <circle cx="80" cy="30" r="13" fill="#f5cfa0" stroke="#1e293b" strokeWidth="2.5" />
-                        <path d="M66 32c0-13 28-13 28 0v8H66z" fill="#1e293b" />
-                        <circle cx="80" cy="31" r="11" fill="#f5cfa0" />
-                        <path d="M64 62c0-10 7-17 16-17s16 7 16 17" fill="#ef4444" stroke="#1e293b" strokeWidth="2.5" />
-                        <circle cx="60" cy="60" r="16" fill="#38bdf8" stroke="#1e293b" strokeWidth="2.5" />
-                        <path d="M50 56c4-3 8 2 12-1s6-4 9 1v8c-5 4-15 3-21-2z" fill="#4ade80" />
-                      </svg>
-                    )}
-                    {arena.theme === 'cyan' && (
-                      <svg viewBox="0 0 120 90" className="arena-card__svg">
-                        {/* Mini papan Ludo & tim */}
-                        <rect x="42" y="10" width="36" height="36" rx="4" fill="#ffffff" stroke="#1e293b" strokeWidth="2.5" />
-                        <rect x="45" y="13" width="12" height="12" fill="#eab308" />
-                        <rect x="63" y="13" width="12" height="12" fill="#3b82f6" />
-                        <rect x="45" y="31" width="12" height="12" fill="#22c55e" />
-                        <rect x="63" y="31" width="12" height="12" fill="#ef4444" />
-                        <circle cx="34" cy="56" r="10" fill="#f5cfa0" stroke="#1e293b" strokeWidth="2" />
-                        <path d="M22 76c0-7 5-12 12-12s12 5 12 12" fill="#22c55e" stroke="#1e293b" strokeWidth="2" />
-                        <circle cx="60" cy="58" r="10" fill="#f5cfa0" stroke="#1e293b" strokeWidth="2" />
-                        <path d="M48 78c0-7 5-12 12-12s12 5 12 12" fill="#3b82f6" stroke="#1e293b" strokeWidth="2" />
-                        <circle cx="86" cy="56" r="10" fill="#f5cfa0" stroke="#1e293b" strokeWidth="2" />
-                        <path d="M74 76c0-7 5-12 12-12s12 5 12 12" fill="#f97316" stroke="#1e293b" strokeWidth="2" />
-                      </svg>
-                    )}
-                    {arena.theme === 'purple' && (
-                      <svg viewBox="0 0 120 90" className="arena-card__svg">
-                        {/* Mahkota & Pulau Arena Baru */}
-                        <ellipse cx="60" cy="65" rx="34" ry="12" fill="#4ade80" stroke="#1e293b" strokeWidth="2.5" />
-                        <path d="M36 52l8-22 16 12 16-12 8 22z" fill="#facc15" stroke="#1e293b" strokeWidth="2.5" strokeLinejoin="round" />
-                        <circle cx="44" cy="26" r="3.5" fill="#fef08a" />
-                        <circle cx="60" cy="22" r="4" fill="#ef4444" />
-                        <circle cx="76" cy="26" r="3.5" fill="#fef08a" />
-                      </svg>
-                    )}
-                  </div>
-                  <span className="arena-card__title">{arena.title}</span>
-                  <span className="arena-card__sub">{arena.subtitle}</span>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Mini-island dekoratif di kiri bawah seperti referensi */}
-        <div className="lobby-island-deco" aria-hidden="true">
-          <div className="lobby-island-deco__figure">
-            <span className="lobby-island-deco__cube">🎲</span>
-            <span className="lobby-island-deco__flower">🌸</span>
-            <span className="lobby-island-deco__lock">🔒</span>
-          </div>
-          <span className="lobby-island-deco__label">Terbuka di level 3</span>
-        </div>
-
-        {/* ── 4 Slot Peti (Ranura de cofre) ── */}
-        <div className="lobby-chests" aria-label="Slot Peti Hadiah">
-          {[1, 2, 3, 4].map((slot) => (
-            <div key={slot} className="lobby-chest-slot">
-              <span>Slot<br />Peti</span>
-            </div>
-          ))}
-        </div>
+        </footer>
       </div>
 
-      {/* ── Navigasi Bawah (5 Tab) ── */}
-      <nav className="lobby-bottom-nav" aria-label="Navigasi Utama">
-        <button type="button" className="lobby-nav-item" onClick={props.onPlay}>
-          <span className="lobby-nav-item__icon" aria-hidden="true">🏪</span>
-          <span className="lobby-nav-item__label">TOKO</span>
-        </button>
-        <button type="button" className="lobby-nav-item" onClick={props.onPlay}>
-          <span className="lobby-nav-item__icon" aria-hidden="true">🎲</span>
-          <span className="lobby-nav-item__label">INVENTARIS</span>
-        </button>
-        <button type="button" className="lobby-nav-item lobby-nav-item--active" onClick={props.onPlay}>
-          <span className="lobby-nav-item__icon" aria-hidden="true">🏠</span>
-          <span className="lobby-nav-item__label">BERANDA</span>
-        </button>
-        <button type="button" className="lobby-nav-item" onClick={props.onPlay}>
-          <span className="lobby-nav-item__icon" aria-hidden="true">👥</span>
-          <span className="lobby-nav-item__label">TEMAN</span>
-        </button>
-        <button type="button" className="lobby-nav-item" onClick={props.onPlay}>
-          <span className="lobby-nav-item__icon" aria-hidden="true">🕹️</span>
-          <span className="lobby-nav-item__label">MINIGAME</span>
-        </button>
-      </nav>
+      {/* ── Modal Konfirmasi Pembelian Item Terkunci ── */}
+      {pendingBuy && (
+        <div className="cust-modal-backdrop" role="dialog" aria-modal="true" aria-label={`Beli ${pendingBuy.name}`}>
+          <div className="cust-modal">
+            <h2 className="cust-modal__title">Buka Item Baru</h2>
+            <p className="cust-modal__name">{pendingBuy.name}</p>
+            <p className="cust-modal__sub">{pendingBuy.subtitle}</p>
+
+            <div className="cust-modal__price-box">
+              <span>Harga:</span>
+              <strong>🪙 {pendingBuy.price} Coins</strong>
+            </div>
+
+            {buyError && (
+              <p className="cust-modal__error" role="alert">{buyError}</p>
+            )}
+
+            <div className="cust-modal__actions">
+              <button
+                type="button"
+                id="confirm-buy-btn"
+                className="cust-play-btn cust-modal__buy-btn"
+                onClick={confirmPurchase}
+              >
+                Beli & Gunakan
+              </button>
+              <button
+                type="button"
+                id="cancel-buy-btn"
+                className="cust-resume-btn"
+                onClick={() => {
+                  setPendingBuy(null);
+                  setBuyError(null);
+                }}
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
