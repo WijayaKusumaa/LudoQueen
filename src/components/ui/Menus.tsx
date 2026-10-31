@@ -18,6 +18,7 @@ import {
   type DiceSkinDef,
   type PawnSkinDef,
 } from '../../game/customization';
+import { MenuInteractiveCreatures } from './MenuInteractiveCreatures';
 
 /** Escape menutup, Tab berputar di dalam dialog, fokus awal ke elemen pertama. */
 function useDialogFocus(onClose?: () => void) {
@@ -281,6 +282,9 @@ export function TitleScreen(props: {
 
   return (
     <div className="cust-menu" role="dialog" aria-modal="true" aria-label={PERSONAL.title} ref={ref}>
+      {/* ── Lapisan Animasi Hewan Interaktif di Latar Belakang Main Screen ── */}
+      <MenuInteractiveCreatures />
+
       <div className="cust-menu__container">
         {/* ── Header: Judul, Koin, & Pengaturan ── */}
         <header className="cust-header">

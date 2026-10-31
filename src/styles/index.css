@@ -1422,6 +1422,352 @@ html, body, #root {
   font-size: 1rem;
 }
 
+/* ── Main Screen Interactive Creatures (Lumba-lumba, Penyu, Kepiting, dll) ── */
+
+.menu-creatures-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.menu-sea-ambience {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.menu-sea-ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(147, 197, 253, 0.16);
+  pointer-events: none;
+}
+
+.menu-sea-ripple--1 {
+  width: 380px;
+  height: 380px;
+  left: 8%;
+  top: 26%;
+  animation: ripplePulse 9s ease-in-out infinite alternate;
+}
+
+.menu-sea-ripple--2 {
+  width: 520px;
+  height: 520px;
+  right: 5%;
+  top: 45%;
+  animation: ripplePulse 12s ease-in-out infinite alternate-reverse;
+}
+
+.menu-sea-ripple--3 {
+  width: 280px;
+  height: 280px;
+  left: 45%;
+  top: 10%;
+  animation: ripplePulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes ripplePulse {
+  0% {
+    transform: scale(0.9) rotate(0deg);
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(1.15) rotate(30deg);
+    opacity: 0.3;
+  }
+}
+
+/* Individual Creature Containers & Movement */
+.menu-creature {
+  position: absolute;
+  pointer-events: none;
+}
+
+.creature-btn {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  margin: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  touch-action: manipulation;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45));
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
+  user-select: none;
+}
+
+.creature-btn:hover {
+  transform: scale(1.18);
+  filter: drop-shadow(0 6px 16px rgba(56, 189, 248, 0.75));
+}
+
+.creature-btn:active {
+  transform: scale(0.92);
+}
+
+.creature-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 1. Lumba-lumba */
+.menu-creature--dolphin {
+  top: 36%;
+  left: 0;
+  width: 110px;
+  height: 64px;
+  animation: dolphinSwimAcross 24s linear infinite;
+}
+
+@keyframes dolphinSwimAcross {
+  0% {
+    transform: translateX(-140px) translateY(0px) rotate(0deg);
+  }
+  20% {
+    transform: translateX(20vw) translateY(-26px) rotate(-8deg);
+  }
+  40% {
+    transform: translateX(45vw) translateY(12px) rotate(6deg);
+  }
+  60% {
+    transform: translateX(65vw) translateY(-22px) rotate(-6deg);
+  }
+  85% {
+    transform: translateX(85vw) translateY(8px) rotate(4deg);
+  }
+  100% {
+    transform: translateX(calc(100vw + 140px)) translateY(0px) rotate(0deg);
+  }
+}
+
+.creature--jump-flip {
+  animation: dolphinJumpFlip 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+@keyframes dolphinJumpFlip {
+  0% { transform: scale(1) rotate(0deg) translateY(0); }
+  35% { transform: scale(1.4) rotate(-170deg) translateY(-55px); }
+  70% { transform: scale(1.2) rotate(-360deg) translateY(-20px); }
+  100% { transform: scale(1) rotate(-360deg) translateY(0); }
+}
+
+/* 2. Penyu Laut */
+.menu-creature--turtle {
+  top: 64%;
+  left: 0;
+  width: 86px;
+  height: 86px;
+  animation: turtleDriftAcross 30s ease-in-out infinite;
+}
+
+@keyframes turtleDriftAcross {
+  0% {
+    transform: translateX(calc(100vw + 110px)) translateY(0px) rotate(-15deg);
+  }
+  30% {
+    transform: translateX(70vw) translateY(-25px) rotate(-8deg);
+  }
+  60% {
+    transform: translateX(35vw) translateY(15px) rotate(-18deg);
+  }
+  100% {
+    transform: translateX(-120px) translateY(0px) rotate(-12deg);
+  }
+}
+
+.creature--spin-roll {
+  animation: turtleSpinRoll 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+@keyframes turtleSpinRoll {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.35) rotate(180deg); }
+  100% { transform: scale(1) rotate(360deg); }
+}
+
+/* 3. Kepiting Pantai */
+.menu-creature--crab {
+  bottom: 82px;
+  left: 0;
+  width: 90px;
+  height: 66px;
+  animation: crabScuttleAcross 19s ease-in-out infinite alternate;
+}
+
+@keyframes crabScuttleAcross {
+  0% {
+    transform: translateX(3vw) translateY(0) rotate(-3deg);
+  }
+  25% {
+    transform: translateX(25vw) translateY(-6px) rotate(3deg);
+  }
+  50% {
+    transform: translateX(50vw) translateY(0) rotate(-3deg);
+  }
+  75% {
+    transform: translateX(72vw) translateY(-6px) rotate(3deg);
+  }
+  100% {
+    transform: translateX(90vw) translateY(0) rotate(2deg);
+  }
+}
+
+.creature--crab-cheer {
+  animation: crabBounceCheer 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+@keyframes crabBounceCheer {
+  0%, 100% { transform: scale(1) translateY(0); }
+  25% { transform: scale(1.4) translateY(-38px); }
+  50% { transform: scale(1.2) translateY(-10px); }
+  75% { transform: scale(1.32) translateY(-28px); }
+}
+
+.crab-claw-left {
+  transform-origin: 20px 24px;
+  animation: clawWaveLeft 1.2s ease-in-out infinite alternate;
+}
+
+.crab-claw-right {
+  transform-origin: 76px 24px;
+  animation: clawWaveRight 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes clawWaveLeft {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-24deg); }
+}
+
+@keyframes clawWaveRight {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(24deg); }
+}
+
+/* 4. Burung Camar Langit */
+.menu-creature--seagull {
+  top: 14px;
+  left: 0;
+  width: 80px;
+  height: 44px;
+  animation: seagullFlyAcross 20s linear infinite;
+}
+
+@keyframes seagullFlyAcross {
+  0% {
+    transform: translateX(-110px) translateY(0) rotate(3deg);
+  }
+  50% {
+    transform: translateX(50vw) translateY(16px) rotate(-4deg);
+  }
+  100% {
+    transform: translateX(calc(100vw + 110px)) translateY(0) rotate(2deg);
+  }
+}
+
+.creature--loop-roll {
+  animation: seagullLoopRoll 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+@keyframes seagullLoopRoll {
+  0% { transform: scale(1) rotate(0deg) translateY(0); }
+  40% { transform: scale(1.35) rotate(-180deg) translateY(-35px); }
+  80% { transform: scale(1.2) rotate(-360deg) translateY(-10px); }
+  100% { transform: scale(1) rotate(-360deg) translateY(0); }
+}
+
+/* 5. Ikan Buntal Membal */
+.menu-creature--puffer {
+  top: 50%;
+  left: 18px;
+  width: 72px;
+  height: 72px;
+  animation: pufferBobFloat 4.2s ease-in-out infinite alternate;
+}
+
+@keyframes pufferBobFloat {
+  0% { transform: translateY(0px) rotate(-4deg); }
+  100% { transform: translateY(-24px) rotate(6deg); }
+}
+
+.creature--puff-up {
+  animation: pufferBoingAnim 0.95s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+}
+
+@keyframes pufferBoingAnim {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.68); }
+  50% { transform: scale(1.38); }
+  70% { transform: scale(1.55); }
+  100% { transform: scale(1); }
+}
+
+/* Reaksi Sentuhan / Floating Particles & Sound Tag */
+.menu-creature-reaction {
+  position: fixed;
+  z-index: 50;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  animation: reactionFlyUp 1.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.menu-creature-reaction__emoji {
+  font-size: 1.9rem;
+  line-height: 1;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45));
+}
+
+.menu-creature-reaction__text {
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fde047 0%, #f59e0b 100%);
+  color: #78350f;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 900;
+  border: 1.5px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.38);
+  white-space: nowrap;
+}
+
+@keyframes reactionFlyUp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -40%) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, -85%) scale(1.2);
+  }
+  40% {
+    transform: translate(-50%, -100%) scale(1);
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50%, -130%) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -160%) scale(0.65);
+  }
+}
+
+
 /* ── Mobile & Short Screen Adjustments ── */
 @media (max-width: 520px) {
   .cust-menu__container {
