@@ -2,10 +2,11 @@ import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import { GameProvider, useGame } from '../game/store/GameContext';
 import { CustomizationProvider } from '../game/customization';
 import { GameHUD } from '../components/ui/GameHUD';
-import { SettingsPanel, SetupScreen, TitleScreen } from '../components/ui/Menus';
+import { SettingsPanel, SetupScreen, TitleScreen, type GameSessionConfig } from '../components/ui/Menus';
 import { SceneErrorBoundary, WebGLFallback, isWebGLAvailable } from '../components/ui/SceneFallback';
 import { PLAYER_ORDER, type PlayerColor } from '../game/board/boardLayout';
 import { audio } from '../game/audio/audio';
+import { useBotTurnRunner } from '../game/engine/ai';
 import { useSettings } from './useSettings';
 
 const GameCanvas = lazy(() => import('../game/GameCanvas'));
@@ -25,14 +26,47 @@ function Shell({ animate, settings: s }: ShellProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [players, setPlayers] = useState<PlayerColor[]>([...PLAYER_ORDER]);
   const [started, setStarted] = useState(false);
+  const [gameConfig, setGameConfig] = useState<GameSessionConfig>(() => ({
+    mode: 'solo',
+    humanColor: 'yellow',
+    botColors: ['blue', 'red', 'green'],
+  }));
   const onReady = useCallback(() => setReady(true), []);
 
   useEffect(() => {
     audio.configure(s.settings.sound, s.settings.music);
   }, [s.settings.sound, s.settings.music]);
 
-  const start = () => {
-    rematch(players);
+  // Eksekusi otomatis giliran bot untuk mode Solo vs Komputer
+  useBotTurnRunner({
+    enabled: screen === 'playing',
+    mode: gameConfig.mode,
+    botColors: gameConfig.botColors,
+    animate,
+  });
+
+  const startSolo = (chosenHuman: PlayerColor, count: number) => {
+    const opponents = PLAYER_ORDER.filter((c) => c !== chosenHuman).slice(0, count);
+    const activePlayers = PLAYER_ORDER.filter((c) => c === chosenHuman || opponents.includes(c));
+    setGameConfig({
+      mode: 'solo',
+      humanColor: chosenHuman,
+      botColors: opponents,
+    });
+    setPlayers(activePlayers);
+    rematch(activePlayers);
+    setStarted(true);
+    setScreen('playing');
+  };
+
+  const startMultiplayer = (selectedPlayers: PlayerColor[]) => {
+    setGameConfig({
+      mode: 'multiplayer',
+      humanColor: selectedPlayers[0] ?? 'yellow',
+      botColors: [],
+    });
+    setPlayers(selectedPlayers);
+    rematch(selectedPlayers);
     setStarted(true);
     setScreen('playing');
   };
@@ -54,6 +88,9 @@ function Shell({ animate, settings: s }: ShellProps) {
 
       {screen === 'playing' && (
         <GameHUD
+          mode={gameConfig.mode}
+          botColors={gameConfig.botColors}
+          humanColor={gameConfig.humanColor}
           onResetCamera={() => setResetToken((t) => t + 1)}
           onOpenSettings={() => setSettingsOpen(true)}
           onOpenMenu={() => setScreen('title')}
@@ -64,16 +101,17 @@ function Shell({ animate, settings: s }: ShellProps) {
       {screen === 'title' && (
         <TitleScreen
           canResume={started && state.phase !== 'finished'}
-          onPlay={start}
+          onPlay={() => setScreen('setup')}
           onResume={() => setScreen('playing')}
           onSettings={() => setSettingsOpen(true)}
         />
       )}
       {screen === 'setup' && (
         <SetupScreen
-          selected={players}
-          onChange={setPlayers}
-          onStart={start}
+          initialConfig={gameConfig}
+          initialPlayers={players}
+          onStartSolo={startSolo}
+          onStartMultiplayer={startMultiplayer}
           onBack={() => setScreen('title')}
         />
       )}

@@ -5,7 +5,6 @@ import { CrossIsland, HomeBases } from './HomeBases';
 import { IslandDetails } from './IslandDetails';
 import { Ocean } from './Ocean';
 import { SafeZones } from './SafeZones';
-import { AnimatedCreatures } from './AnimatedCreatures';
 import { GameCamera } from '../camera/GameCamera';
 import { GameLayer } from '../GameLayer';
 
@@ -47,7 +46,6 @@ export function BoardScene({ resetToken, animate }: BoardSceneProps) {
       <SafeZones />
       <CenterDestination />
       <IslandDetails />
-      <AnimatedCreatures animate={animate} />
 
       {/* Game pieces and dice — driven by engine state + animation queue */}
       <GameLayer animate={animate} />

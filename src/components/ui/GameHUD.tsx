@@ -20,6 +20,9 @@ export interface GameHUDProps {
   onOpenSettings: () => void;
   onOpenMenu: () => void;
   onOpenSetup: () => void;
+  mode?: 'multiplayer' | 'solo';
+  botColors?: readonly PlayerColor[];
+  humanColor?: PlayerColor;
 }
 
 const PLAYER_NAMES: Record<PlayerColor, string> = {
@@ -41,17 +44,35 @@ const PLAYER_SLOTS: Record<
   green: { label: 'PLAYER_4', sub: 'Hijau', corner: 'bottom-left' },
 };
 
-function PlayerCornerCard({ color }: { color: PlayerColor }) {
+function PlayerCornerCard({
+  color,
+  mode = 'multiplayer',
+  botColors = [],
+  humanColor,
+}: {
+  color: PlayerColor;
+  mode?: 'multiplayer' | 'solo';
+  botColors?: readonly PlayerColor[];
+  humanColor?: PlayerColor;
+}) {
   const { state, anim, locked, roll } = useGame();
   if (!state.players.includes(color)) return null;
 
+  const isBot = mode === 'solo' && botColors.includes(color);
+  const isHuman = mode === 'solo' && humanColor === color;
   const slot = PLAYER_SLOTS[color];
   const isTurn = (anim.holdPlayer ?? state.current) === color;
   const finishIndex = state.finishOrder.indexOf(color);
   const isFinished = finishIndex !== -1;
   const theme = PLAYER_THEME[color];
-  const canRollHere = isTurn && !locked && state.phase === 'awaitingRoll';
+  const canRollHere = !isBot && isTurn && !locked && state.phase === 'awaitingRoll';
   const lastRollVal = state.lastRoll?.player === color ? state.lastRoll.value : null;
+
+  const cardLabel = isBot
+    ? `🤖 BOT ${PLAYER_NAMES[color].toUpperCase()}`
+    : isHuman
+      ? `👤 KAMU (${PLAYER_NAMES[color].toUpperCase()})`
+      : slot.label;
 
   return (
     <aside
@@ -63,17 +84,30 @@ function PlayerCornerCard({ color }: { color: PlayerColor }) {
           '--p-light': theme.light,
         } as CSSProperties
       }
-      aria-label={`${slot.label} (${PLAYER_NAMES[color]})${isTurn ? ' - Giliran aktif' : ''}`}
+      aria-label={`${cardLabel}${isTurn ? ' - Giliran aktif' : ''}`}
     >
       <div className="player-hud-card__body">
         {/* Avatar Box */}
         <div className="player-hud-card__avatar-box">
-          <svg viewBox="0 0 36 36" className="player-hud-card__avatar-svg" fill={theme.main}>
-            <circle cx="18" cy="11" r="7" />
-            <path d="M6 31c0-6.6 5.4-12 12-12s12 5.4 12 12v1H6v-1z" />
-          </svg>
+          {isBot ? (
+            <svg viewBox="0 0 36 36" className="player-hud-card__avatar-svg" fill={theme.main}>
+              <rect x="8" y="11" width="20" height="15" rx="4" />
+              <circle cx="13.5" cy="17.5" r="2.5" fill="#ffffff" />
+              <circle cx="22.5" cy="17.5" r="2.5" fill="#ffffff" />
+              <circle cx="14" cy="17.5" r="1.2" fill="#1e293b" />
+              <circle cx="22" cy="17.5" r="1.2" fill="#1e293b" />
+              <line x1="18" y1="11" x2="18" y2="5" stroke={theme.main} strokeWidth="2.5" strokeLinecap="round" />
+              <circle cx="18" cy="4" r="2.5" fill="#ef4444" />
+              <rect x="13" y="22" width="10" height="1.8" rx="0.9" fill="#ffffff" />
+            </svg>
+          ) : (
+            <svg viewBox="0 0 36 36" className="player-hud-card__avatar-svg" fill={theme.main}>
+              <circle cx="18" cy="11" r="7" />
+              <path d="M6 31c0-6.6 5.4-12 12-12s12 5.4 12 12v1H6v-1z" />
+            </svg>
+          )}
           <span className="player-hud-card__badge-icon" aria-hidden="true">
-            🎁
+            {isBot ? '🤖' : '🎁'}
           </span>
         </div>
 
@@ -93,7 +127,7 @@ function PlayerCornerCard({ color }: { color: PlayerColor }) {
               }
               : undefined
           }
-          title={canRollHere ? 'Ketuk untuk melempar dadu' : undefined}
+          title={canRollHere ? 'Ketuk untuk melempar dadu' : isBot && isTurn ? 'Komputer sedang bermain' : undefined}
         >
           {isFinished ? (
             <span className="player-hud-card__medal">{PLACE_EMOJI[finishIndex] ?? '🏆'}</span>
@@ -115,13 +149,13 @@ function PlayerCornerCard({ color }: { color: PlayerColor }) {
 
       {/* Pill Name Badge at bottom */}
       <div className="player-hud-card__pill">
-        <span className="player-hud-card__pill-text">{slot.label}</span>
+        <span className="player-hud-card__pill-text">{cardLabel}</span>
       </div>
     </aside>
   );
 }
 
-function TurnBadge() {
+function TurnBadge({ isBotTurn }: { isBotTurn: boolean }) {
   const { state, anim } = useGame();
   if (state.phase === 'finished') return null;
 
@@ -132,16 +166,16 @@ function TurnBadge() {
   let phaseLabel: string;
   if (anim.busy) {
     phaseLabel = anim.rolling
-      ? 'Mengocok dadu…'
+      ? isBotTurn ? '🤖 Bot mengocok dadu…' : 'Mengocok dadu…'
       : anim.notice === 'noMove'
-        ? 'Tidak ada langkah'
+        ? isBotTurn ? '🤖 Bot tidak ada langkah' : 'Tidak ada langkah'
         : anim.notice === 'forfeit'
           ? 'Tiga angka 6 — giliran hangus'
-          : 'Bergerak…';
+          : isBotTurn ? '🤖 Bot melangkah…' : 'Bergerak…';
   } else if (state.phase === 'awaitingRoll') {
-    phaseLabel = 'Lempar dadu';
+    phaseLabel = isBotTurn ? '🤖 Giliran Bot (melempar…)' : 'Lempar dadu';
   } else {
-    phaseLabel = `Pilih pion · 🎲 ${state.dice}`;
+    phaseLabel = isBotTurn ? `🤖 Bot melangkah · 🎲 ${state.dice}` : `Pilih pion · 🎲 ${state.dice}`;
   }
 
   return (
@@ -164,9 +198,9 @@ function TurnBadge() {
   );
 }
 
-function RollControls() {
+function RollControls({ isBotTurn }: { isBotTurn: boolean }) {
   const { state, anim, locked, roll, skipAnimation } = useGame();
-  const canRoll = !locked && state.phase === 'awaitingRoll';
+  const canRoll = !isBotTurn && !locked && state.phase === 'awaitingRoll';
 
   return (
     <div className="roll-controls">
@@ -186,8 +220,9 @@ function RollControls() {
           className="hud__button"
           onClick={roll}
           disabled={!canRoll}
+          title={isBotTurn ? 'Giliran komputer' : undefined}
         >
-          Lempar dadu
+          {isBotTurn ? '🤖 Giliran Bot' : 'Lempar dadu'}
         </button>
       )}
     </div>
@@ -252,8 +287,18 @@ function VictoryOverlay({ onOpenSetup, onOpenMenu }: Pick<GameHUDProps, 'onOpenS
   );
 }
 
-export function GameHUD({ onResetCamera, onOpenSettings, onOpenMenu, onOpenSetup }: GameHUDProps) {
-  const { anim, skipAnimation } = useGame();
+export function GameHUD({
+  onResetCamera,
+  onOpenSettings,
+  onOpenMenu,
+  onOpenSetup,
+  mode = 'multiplayer',
+  botColors = [],
+  humanColor,
+}: GameHUDProps) {
+  const { state, anim, skipAnimation } = useGame();
+  const currentTurnPlayer = anim.holdPlayer ?? state.current;
+  const isBotTurn = mode === 'solo' && botColors.includes(currentTurnPlayer);
 
   // Escape melewati animasi yang sedang berjalan.
   useEffect(() => {
@@ -267,11 +312,11 @@ export function GameHUD({ onResetCamera, onOpenSettings, onOpenMenu, onOpenSetup
 
   return (
     <div className="hud">
-      {/* 4 Corner Player Cards (seperti di screenshot Ludo modern) */}
-      <PlayerCornerCard color="yellow" />
-      <PlayerCornerCard color="blue" />
-      <PlayerCornerCard color="green" />
-      <PlayerCornerCard color="red" />
+      {/* 4 Corner Player Cards */}
+      <PlayerCornerCard color="yellow" mode={mode} botColors={botColors} humanColor={humanColor} />
+      <PlayerCornerCard color="blue" mode={mode} botColors={botColors} humanColor={humanColor} />
+      <PlayerCornerCard color="green" mode={mode} botColors={botColors} humanColor={humanColor} />
+      <PlayerCornerCard color="red" mode={mode} botColors={botColors} humanColor={humanColor} />
 
       <header className="hud__top-center">
         <div className="hud__top-bar">
@@ -316,11 +361,11 @@ export function GameHUD({ onResetCamera, onOpenSettings, onOpenMenu, onOpenSetup
           </div>
         </div>
 
-        <TurnBadge />
+        <TurnBadge isBotTurn={isBotTurn} />
       </header>
 
       <footer className="hud__bottom-center">
-        <RollControls />
+        <RollControls isBotTurn={isBotTurn} />
       </footer>
 
       <VictoryOverlay onOpenSetup={onOpenSetup} onOpenMenu={onOpenMenu} />

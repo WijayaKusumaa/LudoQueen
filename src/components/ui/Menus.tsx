@@ -18,7 +18,6 @@ import {
   type DiceSkinDef,
   type PawnSkinDef,
 } from '../../game/customization';
-import { MenuInteractiveCreatures } from './MenuInteractiveCreatures';
 
 /** Escape menutup, Tab berputar di dalam dialog, fokus awal ke elemen pertama. */
 function useDialogFocus(onClose?: () => void) {
@@ -282,9 +281,6 @@ export function TitleScreen(props: {
 
   return (
     <div className="cust-menu" role="dialog" aria-modal="true" aria-label={PERSONAL.title} ref={ref}>
-      {/* ── Lapisan Animasi Hewan Interaktif di Latar Belakang Main Screen ── */}
-      <MenuInteractiveCreatures />
-
       <div className="cust-menu__container">
         {/* ── Header: Judul, Koin, & Pengaturan ── */}
         <header className="cust-header">
@@ -559,59 +555,184 @@ export function TitleScreen(props: {
   );
 }
 
-// ─── Setup pemain ─────────────────────────────────────────────────────────────
+// ─── Setup Mode Permainan (Multiplayer & Solo vs Komputer) ───────────────────
 
 export const MIN_PLAYERS = 2;
 
+export type GameMode = 'multiplayer' | 'solo';
+
+export interface GameSessionConfig {
+  mode: GameMode;
+  humanColor: PlayerColor;
+  botColors: PlayerColor[];
+}
+
 export function SetupScreen(props: {
-  selected: readonly PlayerColor[];
-  onChange: (players: PlayerColor[]) => void;
-  onStart: () => void;
+  initialConfig?: GameSessionConfig;
+  initialPlayers?: readonly PlayerColor[];
+  onStartSolo: (humanColor: PlayerColor, botCount: number) => void;
+  onStartMultiplayer: (players: PlayerColor[]) => void;
   onBack: () => void;
 }) {
-  const { selected } = props;
-  const toggle = (c: PlayerColor) => {
-    const on = selected.includes(c);
-    if (on && selected.length <= MIN_PLAYERS) return;
-    // Urutan giliran selalu mengikuti urutan papan.
-    props.onChange(PLAYER_ORDER.filter((p) => (p === c ? !on : selected.includes(p))));
+  const [mode, setMode] = useState<GameMode>(props.initialConfig?.mode ?? 'solo');
+  const [humanColor, setHumanColor] = useState<PlayerColor>(props.initialConfig?.humanColor ?? 'yellow');
+  const [botCount, setBotCount] = useState<number>(() => {
+    const len = props.initialConfig?.botColors?.length;
+    return len && len >= 1 && len <= 3 ? len : 3;
+  });
+  const [mpSelected, setMpSelected] = useState<PlayerColor[]>(
+    props.initialPlayers ? [...props.initialPlayers] : [...PLAYER_ORDER]
+  );
+
+  const toggleMp = (c: PlayerColor) => {
+    const on = mpSelected.includes(c);
+    if (on && mpSelected.length <= MIN_PLAYERS) return;
+    setMpSelected(PLAYER_ORDER.filter((p) => (p === c ? !on : mpSelected.includes(p))));
   };
 
   return (
-    <Screen label="Pengaturan pemain" onClose={props.onBack}>
-      <div className="panel">
-        <h2 className="panel__title">Siapa yang bermain?</h2>
-        <p className="panel__hint">Pilih {MIN_PLAYERS}–4 warna. Giliran berjalan searah jarum jam.</p>
-        <ul className="setup-grid">
-          {PLAYER_ORDER.map((c) => {
-            const on = selected.includes(c);
-            const locked = on && selected.length <= MIN_PLAYERS;
-            return (
-              <li key={c}>
-                <button
-                  type="button"
-                  className={`player-card${on ? ' player-card--on' : ''}`}
-                  style={{ '--c': PLAYER_THEME[c].main, '--c-dark': PLAYER_THEME[c].dark } as React.CSSProperties}
-                  aria-pressed={on}
-                  aria-disabled={locked}
-                  onClick={() => toggle(c)}
-                >
-                  <span className="player-card__dot" />
-                  <span className="player-card__name">{PLAYER_THEME[c].label}</span>
-                  <span className="player-card__state">{on ? 'Ikut' : 'Tidak ikut'}</span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-        <div className="panel__actions">
-          <button type="button" id="start-btn" className="hud__button btn--lg" data-autofocus onClick={props.onStart}>
-            Mulai bermain
+    <Screen label="Pilih Mode Permainan" onClose={props.onBack}>
+      <div className="panel panel--setup">
+        <h2 className="panel__title">Pilih Mode Permainan</h2>
+        <p className="panel__hint">Pilih bermain solo melawan komputer atau multiplayer bersama teman.</p>
+
+        {/* ── Tab Pilihan 2 Mode Permainan ── */}
+        <div className="mode-switch-tabs" role="tablist" aria-label="Mode Permainan">
+          <button
+            type="button"
+            id="tab-mode-solo"
+            role="tab"
+            aria-selected={mode === 'solo'}
+            className={`mode-switch-btn${mode === 'solo' ? ' mode-switch-btn--active' : ''}`}
+            onClick={() => setMode('solo')}
+          >
+            <span aria-hidden="true">🤖</span>
+            <span>Solo vs Komputer</span>
           </button>
-          <button type="button" className="hud__button hud__button--quiet btn--lg" onClick={props.onBack}>
-            Kembali
+
+          <button
+            type="button"
+            id="tab-mode-mp"
+            role="tab"
+            aria-selected={mode === 'multiplayer'}
+            className={`mode-switch-btn${mode === 'multiplayer' ? ' mode-switch-btn--active' : ''}`}
+            onClick={() => setMode('multiplayer')}
+          >
+            <span aria-hidden="true">👥</span>
+            <span>Multiplayer</span>
           </button>
         </div>
+
+        {/* ── Mode 1: Solo vs Komputer ── */}
+        {mode === 'solo' && (
+          <div className="mode-content mode-content--solo">
+            <div className="setup-section-title">1. Pilih Warna Pion Kamu:</div>
+            <ul className="setup-grid">
+              {PLAYER_ORDER.map((c) => {
+                const isChosen = humanColor === c;
+                return (
+                  <li key={c}>
+                    <button
+                      type="button"
+                      className={`player-card${isChosen ? ' player-card--on' : ''}`}
+                      style={{ '--c': PLAYER_THEME[c].main, '--c-dark': PLAYER_THEME[c].dark } as React.CSSProperties}
+                      aria-pressed={isChosen}
+                      onClick={() => setHumanColor(c)}
+                    >
+                      <span className="player-card__dot" />
+                      <span className="player-card__name">{PLAYER_THEME[c].label}</span>
+                      <span className="player-card__state">{isChosen ? '👤 Pion Kamu' : 'Lawan Bot'}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div className="setup-section-title" style={{ marginTop: '16px' }}>2. Jumlah Lawan Komputer (Bot):</div>
+            <div className="bot-count-row">
+              <button
+                type="button"
+                className={`bot-count-btn${botCount === 1 ? ' bot-count-btn--active' : ''}`}
+                onClick={() => setBotCount(1)}
+              >
+                1 Bot (1 vs 1)
+              </button>
+              <button
+                type="button"
+                className={`bot-count-btn${botCount === 2 ? ' bot-count-btn--active' : ''}`}
+                onClick={() => setBotCount(2)}
+              >
+                2 Bot (1 vs 2)
+              </button>
+              <button
+                type="button"
+                className={`bot-count-btn${botCount === 3 ? ' bot-count-btn--active' : ''}`}
+                onClick={() => setBotCount(3)}
+              >
+                3 Bot (1 vs 3)
+              </button>
+            </div>
+
+            <div className="panel__actions">
+              <button
+                type="button"
+                id="start-solo-btn"
+                className="hud__button btn--lg"
+                data-autofocus
+                onClick={() => props.onStartSolo(humanColor, botCount)}
+              >
+                Mulai Main Solo vs {botCount} Bot 🤖
+              </button>
+              <button type="button" className="hud__button hud__button--quiet btn--lg" onClick={props.onBack}>
+                Kembali
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Mode 2: Multiplayer (Pass & Play) ── */}
+        {mode === 'multiplayer' && (
+          <div className="mode-content mode-content--mp">
+            <div className="setup-section-title">Pilih 2–4 Warna Pemain:</div>
+            <ul className="setup-grid">
+              {PLAYER_ORDER.map((c) => {
+                const on = mpSelected.includes(c);
+                const locked = on && mpSelected.length <= MIN_PLAYERS;
+                return (
+                  <li key={c}>
+                    <button
+                      type="button"
+                      className={`player-card${on ? ' player-card--on' : ''}`}
+                      style={{ '--c': PLAYER_THEME[c].main, '--c-dark': PLAYER_THEME[c].dark } as React.CSSProperties}
+                      aria-pressed={on}
+                      aria-disabled={locked}
+                      onClick={() => toggleMp(c)}
+                    >
+                      <span className="player-card__dot" />
+                      <span className="player-card__name">{PLAYER_THEME[c].label}</span>
+                      <span className="player-card__state">{on ? 'Ikut' : 'Tidak ikut'}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div className="panel__actions">
+              <button
+                type="button"
+                id="start-mp-btn"
+                className="hud__button btn--lg"
+                data-autofocus
+                onClick={() => props.onStartMultiplayer(mpSelected)}
+              >
+                Mulai Main Multiplayer ({mpSelected.length} Pemain) 👥
+              </button>
+              <button type="button" className="hud__button hud__button--quiet btn--lg" onClick={props.onBack}>
+                Kembali
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </Screen>
   );
