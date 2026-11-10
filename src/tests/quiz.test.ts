@@ -14,9 +14,9 @@ describe('Sistem Kuis Berhadiah Koin (Quiz System)', () => {
     const q1 = ootQuestions.find((q) => q.id === 'oot-1')!;
     expect(q1).toBeDefined();
     expect(q1.multiSelect).toBe(true);
-    expect(q1.correctIndices).toEqual([0, 1]);
-    expect(q1.options[0]).toContain('main ludo sama oliv ada iklannya');
-    expect(q1.options[1]).toContain('oliv itu sendiri');
+    expect(q1.correctIndices).toEqual([0, 3]);
+    expect(q1.options[0]).toContain('mabar Ludo bareng O iklannya banyak bener');
+    expect(q1.options[3]).toContain('Karna aku pinter aja sih');
 
     // Soal 2: Tanggal pertama kali dibuat (21 Oktober)
     const q2 = ootQuestions.find((q) => q.id === 'oot-2')!;
@@ -52,3 +52,4 @@ describe('Sistem Kuis Berhadiah Koin (Quiz System)', () => {
     }
   });
 });
+

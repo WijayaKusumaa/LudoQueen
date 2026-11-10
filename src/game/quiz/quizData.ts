@@ -31,13 +31,13 @@ export const QUIZ_QUESTIONS: readonly QuizQuestion[] = [
     multiSelect: true,
     question: 'Apa alasan Wijaya membuat aplikasi ini? (Pilih 2 jawaban yang benar!)',
     options: [
-      'Karna dia main ludo sama oliv ada iklannya jadi dia pengen buat sendiri',
-      'Karna oliv itu sendiri',
-      'Cuma iseng mengisi waktu luang di akhir pekan',
-      'Disuruh dosen untuk tugas akhir kuliah',
+      'Males banget pas mabar Ludo bareng O iklannya banyak bener, makanya jadi niat bikin sendiri.',
+      'Pengen bikin spesial buat si O biar pas main gak terganggu iklan.',
+      'Cuma gabut iseng aja ngabisin waktu luang pas weekend kemarin.',
+      'Karna aku pinter aja sih',
     ],
-    correctIndices: [0, 1],
-    explanation: 'Wijaya membuat game ini murni karena main bareng Oliv terganggu iklan, dan dedikasi spesial untuk Oliv itu sendiri! ❤️',
+    correctIndices: [0, 3],
+    explanation: 'Males mabar Ludo ada banyak iklannya makanya niat bikin sendiri, dan ya... karna Wijaya emang pinter aja sih! 😎',
   },
   {
     id: 'oot-2',
@@ -437,3 +437,4 @@ export const QUIZ_QUESTIONS: readonly QuizQuestion[] = [
     explanation: 'Pinokio adalah tokoh cerita anak karya Carlo Collodi yang hidungnya memanjang saat ia berdusta.',
   },
 ];
+
