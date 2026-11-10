@@ -1,4 +1,6 @@
 import { Environment, Lightformer } from '@react-three/drei';
+import { ArenaScenery, ARENA_LIGHT } from './ArenaScenery';
+import { useCustomization } from '../customization';
 import { BoardTiles } from './BoardTiles';
 import { CenterDestination } from './CenterDestination';
 import { CrossIsland, HomeBases } from './HomeBases';
@@ -15,12 +17,14 @@ export interface BoardSceneProps {
 
 /** Seluruh isi dunia 3D: cahaya, laut, pulau, papan, pion game, kamera. */
 export function BoardScene({ resetToken, animate }: BoardSceneProps) {
+  const { arenaDef } = useCustomization();
+  const L = ARENA_LIGHT[arenaDef.id];
   return (
     <>
-      <hemisphereLight args={['#d6f1f2', '#b59c74', 0.85]} />
+      <hemisphereLight key={arenaDef.id} args={[L.sky, L.ground, L.hemiI]} />
       <directionalLight
-        color="#ffe2b5"
-        intensity={2.3}
+        color={L.sun}
+        intensity={L.sunI}
         position={[-9, 15, 10]}
         castShadow
         shadow-mapSize={[2048, 2048]}
@@ -46,6 +50,7 @@ export function BoardScene({ resetToken, animate }: BoardSceneProps) {
       <SafeZones />
       <CenterDestination />
       <IslandDetails />
+      <ArenaScenery animate={animate} />
 
       {/* Game pieces and dice — driven by engine state + animation queue */}
       <GameLayer animate={animate} />
