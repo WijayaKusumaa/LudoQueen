@@ -8,6 +8,7 @@
 
 export type QuizCategory = 'out_of_topic' | 'general';
 export type QuizDifficulty = 'easy' | 'medium' | 'hard';
+export type QuizQuestionType = 'multiple_choice' | 'essay';
 
 export interface QuizQuestion {
   id: string;
@@ -15,11 +16,20 @@ export interface QuizQuestion {
   difficulty: QuizDifficulty;
   reward: number;
   question: string;
-  options: string[];
-  correctIndices: number[]; // Index jawaban yang benar
+  type?: QuizQuestionType;
+  options?: string[];
+  correctIndices?: number[]; // Index jawaban yang benar untuk multiple_choice
+  correctTextAnswers?: string[]; // Jawaban teks yang diterima untuk essay
   multiSelect?: boolean; // True jika soal mengharuskan memilih lebih dari 1 jawaban
   explanation?: string;
 }
+
+/** Pertanyaan rahasia untuk membuka kembali soal yang terkunci karena salah jawab */
+export const SECRET_UNLOCK_INFO = {
+  question: 'Pertanyaan ini hanya Oliv dan Wijaya yang tahu: Makanan pinggir jalan apa yang paling J (Wijaya) ga suka?',
+  clue: 'Clue (buat yang bukan O): Aku tuh ga suka tahu tek',
+  acceptedAnswers: ['tahu tek', 'tahutek', 'tahu tek-tek', 'tahutektek'],
+} as const;
 
 export const QUIZ_QUESTIONS: readonly QuizQuestion[] = [
   // ─── KATEGORI 1: OUT OF TOPIC (SPESIAL DEVELOPER) - 1.000 KOIN ───────────────
@@ -54,15 +64,10 @@ export const QUIZ_QUESTIONS: readonly QuizQuestion[] = [
     category: 'out_of_topic',
     difficulty: 'hard',
     reward: 1000,
-    question: 'Kenapa si pembuat game sangat benci cewek friendly?',
-    options: [
-      'Karna ga ada value sama sekali',
-      'Karna sering bikin boros waktu',
-      'Karna susah ditebak maunya apa',
-      'Karna punya terlalu banyak teman',
-    ],
-    correctIndices: [0],
-    explanation: 'Prinsip tegas dari sang pembuat game: Karna ga ada value sama sekali.',
+    type: 'essay',
+    question: 'Apa kepanjangan dari SASIMO?',
+    correctTextAnswers: ['sana sini mau', 'sanasinimau', 'sana-sini mau'],
+    explanation: 'SASIMO adalah istilah gaul singkatan dari "Sana Sini Mau"!',
   },
 
   // ─── KATEGORI 2: PENGETAHUAN UMUM (10 - 50 KOIN) ─────────────────────────────

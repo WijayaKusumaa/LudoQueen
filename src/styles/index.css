@@ -2011,6 +2011,224 @@ html, body, #root {
   background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
 }
 
+/* ── Quiz Chip Locked ── */
+.quiz-chip--locked {
+  border-color: #fca5a5;
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.quiz-chip__lock {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+/* ── Quiz Essay Question ── */
+.quiz-essay-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.quiz-essay-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.quiz-essay-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid #cbd5e1;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.quiz-essay-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.quiz-essay-input:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* ── Quiz Locked Warning Banner ── */
+.quiz-locked-banner {
+  background: #fef2f2;
+  border: 2px solid #fca5a5;
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  animation: fadeIn 0.2s ease;
+}
+
+.quiz-locked-banner__icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.quiz-locked-banner__content {
+  flex: 1;
+  min-width: 180px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #991b1b;
+  line-height: 1.4;
+}
+
+.quiz-locked-banner__btn {
+  background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(234, 88, 12, 0.35);
+  transition: all 0.12s ease;
+}
+
+.quiz-locked-banner__btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.45);
+}
+
+/* ── Secret Unlock Dialog ── */
+.quiz-unlock-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+  animation: fadeIn 0.18s ease;
+}
+
+.quiz-unlock-dialog {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 440px;
+  width: 100%;
+  padding: 22px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+  border: 2.5px solid #f97316;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: popIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.quiz-unlock-dialog__header {
+  text-align: center;
+}
+
+.quiz-unlock-dialog__icon {
+  font-size: 2.4rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.quiz-unlock-dialog__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.quiz-unlock-dialog__sub {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.quiz-unlock-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quiz-unlock-dialog__question {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1e293b;
+  line-height: 1.4;
+}
+
+.quiz-unlock-dialog__clue-box {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: #fffbeb;
+  border: 1.5px dashed #f59e0b;
+  border-radius: 12px;
+  padding: 10px 14px;
+}
+
+.quiz-unlock-dialog__clue-icon {
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.quiz-unlock-dialog__clue-text {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #92400e;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1.35;
+}
+
+.quiz-unlock-dialog__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.quiz-unlock-dialog__label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.quiz-unlock-dialog__error {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.quiz-unlock-dialog__actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+
 /* ── Mobile & Short Screen Adjustments ── */
 @media (max-width: 520px) {
   .cust-menu__container {
