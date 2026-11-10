@@ -536,18 +536,21 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
                 className="hud__button quiz-submit-btn"
                 onClick={handleUnlockSubmit}
                 disabled={!unlockInput.trim()}
+                style={{ flex: 1 }}
               >
                 Buka Kunci Soal 🔓
               </button>
               <button
                 type="button"
-                className="hud__button hud__button--quiet"
+                className="quiz-unlock-back-btn"
                 onClick={() => {
                   setShowUnlockModal(false);
                   setUnlockError(null);
                 }}
+                aria-label="Kembali"
+                title="Kembali"
               >
-                Batal
+                ←
               </button>
             </div>
           </div>

@@ -2226,7 +2226,37 @@ html, body, #root {
 .quiz-unlock-dialog__actions {
   display: flex;
   gap: 10px;
+  align-items: stretch;
   margin-top: 4px;
+}
+
+.quiz-unlock-back-btn {
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  font-size: 1.35rem;
+  line-height: 1;
+  font-weight: 800;
+  width: 50px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  flex-shrink: 0;
+}
+
+.quiz-unlock-back-btn:hover {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
+  transform: translateY(-1px);
+}
+
+.quiz-unlock-back-btn:active {
+  transform: translateY(1px);
 }
 
 /* ── Mobile & Short Screen Adjustments ── */
