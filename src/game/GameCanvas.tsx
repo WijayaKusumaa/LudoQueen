@@ -7,7 +7,7 @@ import { refreshAllCanvasTextures } from './board/boardTextures';
 export interface GameCanvasProps {
   resetToken: number;
   animate: boolean;
-  onReady: () => void;
+  onReady?: () => void;
 }
 
 /** Pembungkus Canvas R3F; terpisah dari antarmuka DOM. */
@@ -24,7 +24,9 @@ export default function GameCanvas({ resetToken, animate, onReady }: GameCanvasP
         gl.domElement.addEventListener('webglcontextrestored', () => {
           refreshAllCanvasTextures();
         });
-        requestAnimationFrame(() => requestAnimationFrame(onReady));
+        if (onReady) {
+          requestAnimationFrame(() => requestAnimationFrame(onReady));
+        }
       }}
       aria-label="Papan Ludo 3D"
     >

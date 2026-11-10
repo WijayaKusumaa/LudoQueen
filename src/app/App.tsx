@@ -1,10 +1,9 @@
-import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import { GameProvider, useGame } from '../game/store/GameContext';
 import { CustomizationProvider } from '../game/customization';
 import { GameHUD } from '../components/ui/GameHUD';
 import { SettingsPanel, SetupScreen, TitleScreen, type GameSessionConfig } from '../components/ui/Menus';
 import { SceneErrorBoundary, WebGLFallback, isWebGLAvailable } from '../components/ui/SceneFallback';
-import { LoadingScreen } from '../components/ui/LoadingScreen';
 import { PLAYER_ORDER, type PlayerColor } from '../game/board/boardLayout';
 import { audio } from '../game/audio/audio';
 import { useBotTurnRunner } from '../game/engine/ai';
@@ -21,7 +20,6 @@ interface ShellProps {
 
 function Shell({ animate, settings: s }: ShellProps) {
   const { rematch, state } = useGame();
-  const [ready, setReady] = useState(false);
   const [resetToken, setResetToken] = useState(0);
   const [screen, setScreen] = useState<Screen>('title');
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -32,8 +30,6 @@ function Shell({ animate, settings: s }: ShellProps) {
     humanColor: 'yellow',
     botColors: ['blue', 'red', 'green'],
   }));
-  const onReady = useCallback(() => setReady(true), []);
-
   useEffect(() => {
     audio.configure(s.settings.sound, s.settings.music);
   }, [s.settings.sound, s.settings.music]);
@@ -82,7 +78,7 @@ function Shell({ animate, settings: s }: ShellProps) {
       <div className="app__canvas">
         <SceneErrorBoundary>
           <Suspense fallback={null}>
-            <GameCanvas resetToken={resetToken} animate={animate} onReady={onReady} />
+            <GameCanvas resetToken={resetToken} animate={animate} />
           </Suspense>
         </SceneErrorBoundary>
       </div>
@@ -125,7 +121,6 @@ function Shell({ animate, settings: s }: ShellProps) {
         />
       )}
 
-      <LoadingScreen ready={ready} reducedMotion={!animate} />
     </main>
   );
 }
