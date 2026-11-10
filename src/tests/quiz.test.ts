@@ -10,11 +10,12 @@ describe('Sistem Kuis Berhadiah Koin (Quiz System)', () => {
       expect(q.reward).toBe(1000);
     }
 
-    // Soal 1: Alasan Wijaya membuat aplikasi (pilih 2 yang benar)
+    // Soal 1: Alasan Developer/J membuat aplikasi (pilih 2 yang benar)
     const q1 = ootQuestions.find((q) => q.id === 'oot-1')!;
     expect(q1).toBeDefined();
     expect(q1.multiSelect).toBe(true);
     expect(q1.correctIndices).toEqual([0, 3]);
+    expect(q1.question).toContain('Developer/J');
     expect(q1.options?.[0]).toContain('mabar Ludo bareng O iklannya banyak bener');
     expect(q1.options?.[3]).toContain('Karna aku pinter aja sih');
 
@@ -32,7 +33,7 @@ describe('Sistem Kuis Berhadiah Koin (Quiz System)', () => {
   });
 
   it('memiliki data tebakan rahasia pembuka kunci soal (tahu tek)', () => {
-    expect(SECRET_UNLOCK_INFO.question).toContain('Oliv dan Wijaya');
+    expect(SECRET_UNLOCK_INFO.question).toContain('O dan Developer/J');
     expect(SECRET_UNLOCK_INFO.clue).toContain('tahu tek');
     expect(SECRET_UNLOCK_INFO.acceptedAnswers).toContain('tahu tek');
     expect(SECRET_UNLOCK_INFO.acceptedAnswers).toContain('tahutek');

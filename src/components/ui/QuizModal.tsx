@@ -8,7 +8,7 @@
  *    - Soal 3: Esai / Ketik Jawaban (Kepanjangan SASIMO)
  * 2. Kategori Pengetahuan Umum: 10 - 50 Koin per pertanyaan (Mudah: 15, Sedang: 25, Sulit: 50).
  * 3. Aturan Baru: Jika salah menjawab, soal otomatis TERKUNCI dan tidak dapat diulang.
- *    Untuk membuka kunci, pemain harus menjawab pertanyaan rahasia yang hanya Oliv dan Wijaya yang tahu.
+ *    Untuk membuka kunci, pemain harus menjawab pertanyaan rahasia yang hanya O dan Developer/J yang tahu.
  */
 
 import React, { useState, useMemo } from 'react';
@@ -187,7 +187,7 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
     }
   };
 
-  // Verifikasi pembukaan kunci soal dengan pertanyaan rahasia Oliv & Wijaya
+  // Verifikasi pembukaan kunci soal dengan pertanyaan rahasia O & Developer/J
   const handleUnlockSubmit = () => {
     const clean = normalizeAnswer(unlockInput);
     const valid = SECRET_UNLOCK_INFO.acceptedAnswers.some((ans) => normalizeAnswer(ans) === clean);
@@ -359,7 +359,7 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
                       setShowUnlockModal(true);
                     }}
                   >
-                    🔑 Buka Kunci Soal (Tebak Rahasia Oliv & Wijaya)
+                    🔑 Buka Kunci Soal (Tebak Rahasia)
                   </button>
                 </div>
               </div>
@@ -448,7 +448,7 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
                   )}
                   {!isCorrect && (
                     <p className="quiz-feedback__desc">
-                      Soal ini telah terkunci. Klik tombol <strong>Buka Kunci</strong> di atas untuk menjawab tebakan rahasia Oliv & Wijaya agar bisa mengulang kembali!
+                      Soal ini telah terkunci. Klik tombol <strong>Buka Kunci</strong> di atas untuk menjawab tebakan rahasia O & Developer/J agar bisa mengulang kembali!
                     </p>
                   )}
                 </div>
@@ -480,14 +480,14 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
         </div>
       </div>
 
-      {/* ── Modal Buka Kunci: Pertanyaan Rahasia Oliv & Wijaya ── */}
+      {/* ── Modal Buka Kunci: Pertanyaan Rahasia O & Developer/J ── */}
       {showUnlockModal && (
         <div className="quiz-unlock-backdrop" role="dialog" aria-modal="true" aria-label="Buka Kunci Soal">
           <div className="quiz-unlock-dialog">
             <div className="quiz-unlock-dialog__header">
               <span className="quiz-unlock-dialog__icon">🤫</span>
               <h3 className="quiz-unlock-dialog__title">Tebakan Rahasia</h3>
-              <p className="quiz-unlock-dialog__sub">Hanya Oliv dan Wijaya yang tahu!</p>
+              <p className="quiz-unlock-dialog__sub">Hanya O dan Developer/J yang tahu!</p>
             </div>
 
             <div className="quiz-unlock-dialog__body">

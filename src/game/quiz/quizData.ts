@@ -26,7 +26,7 @@ export interface QuizQuestion {
 
 /** Pertanyaan rahasia untuk membuka kembali soal yang terkunci karena salah jawab */
 export const SECRET_UNLOCK_INFO = {
-  question: 'Pertanyaan ini hanya Oliv dan Wijaya yang tahu: Makanan pinggir jalan apa yang paling J (Wijaya) ga suka?',
+  question: 'Pertanyaan ini hanya O dan Developer/J yang tahu: Makanan pinggir jalan apa yang paling J ga suka?',
   clue: 'Clue (buat yang bukan O): Aku tuh ga suka tahu tek',
   acceptedAnswers: ['tahu tek', 'tahutek', 'tahu tek-tek', 'tahutektek'],
 } as const;
@@ -39,7 +39,7 @@ export const QUIZ_QUESTIONS: readonly QuizQuestion[] = [
     difficulty: 'hard',
     reward: 1000,
     multiSelect: true,
-    question: 'Apa alasan Wijaya membuat aplikasi ini? (Pilih 2 jawaban yang benar!)',
+    question: 'Apa alasan Developer/J membuat aplikasi ini? (Pilih 2 jawaban yang benar!)',
     options: [
       'Males banget pas mabar Ludo bareng O iklannya banyak bener, makanya jadi niat bikin sendiri.',
       'Pengen bikin spesial buat si O biar pas main gak terganggu iklan.',
@@ -47,7 +47,7 @@ export const QUIZ_QUESTIONS: readonly QuizQuestion[] = [
       'Karna aku pinter aja sih',
     ],
     correctIndices: [0, 3],
-    explanation: 'Males mabar Ludo ada banyak iklannya makanya niat bikin sendiri, dan ya... karna Wijaya emang pinter aja sih! 😎',
+    explanation: 'Males mabar Ludo ada banyak iklannya makanya niat bikin sendiri, dan ya... karna Developer/J emang pinter aja sih! 😎',
   },
   {
     id: 'oot-2',
