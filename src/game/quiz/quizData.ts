@@ -57,7 +57,7 @@ export const QUIZ_QUESTIONS: readonly QuizQuestion[] = [
     question: 'Pertama kali game ini dibuat tanggal berapa?',
     options: ['19 Oktober', '20 Oktober', '21 Oktober', '22 Oktober'],
     correctIndices: [2],
-    explanation: 'Aplikasi Olivia\'s Little Island pertama kali mulai dibuat pada tanggal 21 Oktober!',
+    explanation: 'Aplikasi Olivia\'s Little Island pertama kali mulai dibuat pada tanggal 21 Oktober!, after from trawas',
   },
   {
     id: 'oot-3',
