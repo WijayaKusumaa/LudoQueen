@@ -27,7 +27,7 @@ export interface QuizQuestion {
 /** Pertanyaan rahasia untuk membuka kembali soal yang terkunci karena salah jawab */
 export const SECRET_UNLOCK_INFO = {
   question: 'Pertanyaan ini hanya O dan Developer/J yang tahu: Makanan pinggir jalan apa yang paling J ga suka?',
-  clue: 'Clue (buat yang bukan O): Aku tuh ga suka tahu tek',
+  clue: 'Tanyakan saja pada ibu O yang terhormat wkwk',
   acceptedAnswers: ['tahu tek', 'tahutek', 'tahu tek-tek', 'tahutektek'],
 } as const;
 

@@ -76,6 +76,7 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
 
   // Secret unlock modal state
   const [showUnlockModal, setShowUnlockModal] = useState<boolean>(false);
+  const [showClue, setShowClue] = useState<boolean>(false);
   const [unlockInput, setUnlockInput] = useState<string>('');
   const [unlockError, setUnlockError] = useState<string | null>(null);
 
@@ -356,6 +357,7 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
                     onClick={() => {
                       setUnlockError(null);
                       setUnlockInput('');
+                      setShowClue(false);
                       setShowUnlockModal(true);
                     }}
                   >
@@ -484,6 +486,16 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
       {showUnlockModal && (
         <div className="quiz-unlock-backdrop" role="dialog" aria-modal="true" aria-label="Buka Kunci Soal">
           <div className="quiz-unlock-dialog">
+            <button
+              type="button"
+              className={`quiz-unlock-clue-btn${showClue ? ' quiz-unlock-clue-btn--active' : ''}`}
+              onClick={() => setShowClue((prev) => !prev)}
+              aria-label={showClue ? 'Sembunyikan Clue' : 'Lihat Clue'}
+              title={showClue ? 'Sembunyikan Clue' : 'Lihat Clue'}
+            >
+              💡 Clue
+            </button>
+
             <div className="quiz-unlock-dialog__header">
               <span className="quiz-unlock-dialog__icon">🤫</span>
               <h3 className="quiz-unlock-dialog__title">Tebakan Rahasia</h3>
@@ -495,12 +507,14 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
                 {SECRET_UNLOCK_INFO.question}
               </p>
 
-              <div className="quiz-unlock-dialog__clue-box">
-                <span className="quiz-unlock-dialog__clue-icon">💡</span>
-                <p className="quiz-unlock-dialog__clue-text">
-                  {SECRET_UNLOCK_INFO.clue}
-                </p>
-              </div>
+              {showClue && (
+                <div className="quiz-unlock-dialog__clue-box" role="region" aria-live="polite">
+                  <span className="quiz-unlock-dialog__clue-icon">💡</span>
+                  <p className="quiz-unlock-dialog__clue-text">
+                    {SECRET_UNLOCK_INFO.clue}
+                  </p>
+                </div>
+              )}
 
               <div className="quiz-unlock-dialog__field">
                 <label htmlFor="quiz-unlock-input" className="quiz-unlock-dialog__label">
@@ -546,6 +560,7 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
                 onClick={() => {
                   setShowUnlockModal(false);
                   setUnlockError(null);
+                  setShowClue(false);
                 }}
                 aria-label="Kembali"
                 title="Kembali"

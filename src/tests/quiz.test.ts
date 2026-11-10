@@ -34,7 +34,7 @@ describe('Sistem Kuis Berhadiah Koin (Quiz System)', () => {
 
   it('memiliki data tebakan rahasia pembuka kunci soal (tahu tek)', () => {
     expect(SECRET_UNLOCK_INFO.question).toContain('O dan Developer/J');
-    expect(SECRET_UNLOCK_INFO.clue).toContain('tahu tek');
+    expect(SECRET_UNLOCK_INFO.clue).toContain('ibu O yang terhormat');
     expect(SECRET_UNLOCK_INFO.acceptedAnswers).toContain('tahu tek');
     expect(SECRET_UNLOCK_INFO.acceptedAnswers).toContain('tahutek');
   });

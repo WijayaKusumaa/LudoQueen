@@ -333,7 +333,7 @@ export const PAWN_CATALOG: readonly PawnSkinDef[] = [
 // ─── State & Persistence ──────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'olivia-ludo:customization:v1';
-export const INITIAL_COINS = 1000;
+export const INITIAL_COINS = 300;
 
 export interface CustomizationState {
   readonly coins: number;
@@ -564,9 +564,9 @@ export function useCustomization(): CustomizationContextValue {
       arenaDef: ARENA_CATALOG[0]!,
       diceDef: DICE_CATALOG[0]!,
       pawnDef: PAWN_CATALOG[0]!,
-      selectItem: () => {},
+      selectItem: () => { },
       buyItem: () => ({ ok: false, reason: 'INVALID_ITEM', state: DEFAULT_STATE }),
-      addCoins: () => {},
+      addCoins: () => { },
     };
   }
   return ctx;
