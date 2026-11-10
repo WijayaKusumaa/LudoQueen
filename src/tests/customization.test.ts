@@ -24,10 +24,10 @@ describe('Sistem Kustomisasi & Toko Ludo (Arena, Dice, Pawn)', () => {
   });
 
   it('membeli item yang terkunci mengurangi koin, menambahkan ke daftar owned, dan menjadikannya ACTIVE', () => {
-    // Forest Arena berharga 150 koin
-    const res = processPurchase(baseState, 'arena', 'forest');
+    // Forest Arena berharga 500 koin
+    const res = processPurchase({ ...baseState, coins: 600 }, 'arena', 'forest');
     expect(res.ok).toBe(true);
-    expect(res.state.coins).toBe(INITIAL_COINS - 150);
+    expect(res.state.coins).toBe(100);
     expect(res.state.owned.arena).toContain('forest');
     expect(res.state.selected.arena).toBe('forest');
   });

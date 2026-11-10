@@ -83,7 +83,7 @@ export const ARENA_CATALOG: readonly ArenaSkinDef[] = [
     id: 'forest',
     name: 'Forest Arena',
     subtitle: 'Hutan Zamrud Rindang',
-    price: 150,
+    price: 500,
     tag: 'New',
     colors: {
       oceanShallow: '#34d399',
@@ -100,7 +100,7 @@ export const ARENA_CATALOG: readonly ArenaSkinDef[] = [
     id: 'candy',
     name: 'Candy Arena',
     subtitle: 'Negeri Permen Manis',
-    price: 250,
+    price: 800,
     tag: 'Hot',
     colors: {
       oceanShallow: '#f472b6',
@@ -117,7 +117,7 @@ export const ARENA_CATALOG: readonly ArenaSkinDef[] = [
     id: 'space',
     name: 'Space Arena',
     subtitle: 'Galaksi Nebula Kosmik',
-    price: 350,
+    price: 1500,
     colors: {
       oceanShallow: '#6366f1',
       oceanDeep: '#1e1b4b',
@@ -133,7 +133,7 @@ export const ARENA_CATALOG: readonly ArenaSkinDef[] = [
     id: 'lava',
     name: 'Lava Arena',
     subtitle: 'Kawah Gunung Berapi',
-    price: 500,
+    price: 800,
     tag: 'VIP',
     colors: {
       oceanShallow: '#fb923c',
@@ -150,7 +150,7 @@ export const ARENA_CATALOG: readonly ArenaSkinDef[] = [
     id: 'ice',
     name: 'Ice Arena',
     subtitle: 'Gletser Kutub Kristal',
-    price: 400,
+    price: 1000,
     colors: {
       oceanShallow: '#7dd3fc',
       oceanDeep: '#0369a1',
