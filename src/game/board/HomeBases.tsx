@@ -38,7 +38,11 @@ function Slab({ width, depth, grass }: { width: number; depth: number; grass: Te
         receiveShadow
         castShadow
       >
-        <meshStandardMaterial color={arenaDef.colors.grass} map={grass} roughness={0.95} />
+        <meshStandardMaterial
+          color={arenaDef.colors.grass}
+          {...(arenaDef.id === 'classic' || arenaDef.id === 'forest' ? { map: grass } : {})}
+          roughness={0.95}
+        />
       </RoundedBox>
       <RoundedBox
         args={[width - 0.16, SOIL_H, depth - 0.16]}
