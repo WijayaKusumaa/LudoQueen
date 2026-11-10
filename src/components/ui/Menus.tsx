@@ -605,7 +605,7 @@ export function TitleScreen(props: {
             <span className="cust-modal__badge">⚠️ KONFIRMASI RESET</span>
             <h3 className="cust-modal__title">Reset Semua Koin & Aset?</h3>
             <p className="cust-modal__sub">
-              Saldo koin akan dikembalikan ke <strong>300 Koin</strong>, seluruh arena, dadu, dan pion akan kembali terkunci seperti semula, serta riwayat kuis akan di-reset.
+              Saldo koin akan dikembalikan ke <strong>100 Koin</strong>, seluruh arena, dadu, dan pion akan kembali terkunci seperti semula, serta riwayat kuis akan di-reset.
             </p>
 
             <div className="cust-modal__actions">
