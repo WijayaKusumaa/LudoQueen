@@ -39,14 +39,18 @@ describe('Sistem Kuis Berhadiah Koin (Quiz System)', () => {
     expect(SECRET_UNLOCK_INFO.acceptedAnswers).toContain('tahutek');
   });
 
-  it('memiliki bank soal Pengetahuan Umum dengan reward 10 - 50 koin', () => {
+  it('memiliki bank soal Pengetahuan Umum dengan reward 10 - 50 koin (minimal 50 soal)', () => {
     const genQuestions = QUIZ_QUESTIONS.filter((q) => q.category === 'general');
-    expect(genQuestions.length).toBeGreaterThanOrEqual(25);
+    expect(genQuestions.length).toBeGreaterThanOrEqual(50);
+
+    const logicQuestions = genQuestions.filter((q) => q.question.includes('Logika Informatika'));
+    expect(logicQuestions.length).toBeGreaterThanOrEqual(5);
 
     for (const q of genQuestions) {
       expect(q.reward).toBeGreaterThanOrEqual(10);
       expect(q.reward).toBeLessThanOrEqual(50);
       expect(q.options?.length).toBeGreaterThanOrEqual(3);
+      expect(q.explanation?.length).toBeGreaterThan(15);
       for (const idx of q.correctIndices ?? []) {
         expect(idx).toBeGreaterThanOrEqual(0);
         expect(idx).toBeLessThan(q.options?.length ?? 0);

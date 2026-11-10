@@ -378,7 +378,7 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
                 id="quiz-essay-field"
                 type="text"
                 className="quiz-essay-input"
-                placeholder="Contoh: Sana Sini Mau"
+                placeholder="Contoh: ga ada contoh kerjain sendiri jink"
                 value={essayAnswer}
                 onChange={(e) => setEssayAnswer(e.target.value)}
                 disabled={isCurrentLocked || (submitted && isCorrect)}
@@ -398,8 +398,12 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
                 let optionClass = 'quiz-option';
                 if (isSelected) optionClass += ' quiz-option--selected';
                 if (submitted) {
-                  if (isCorrectOption) optionClass += ' quiz-option--correct';
-                  else if (isSelected && !isCorrectOption) optionClass += ' quiz-option--wrong';
+                  if (isCorrect) {
+                    if (isCorrectOption) optionClass += ' quiz-option--correct';
+                  } else {
+                    // Ketika salah, jangan beri tahu jawaban yang benar agar pemain tetap menebak
+                    if (isSelected) optionClass += ' quiz-option--wrong';
+                  }
                 }
 
                 return (
@@ -445,7 +449,7 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
                       (Soal ini sudah pernah kamu jawab sebelumnya)
                     </p>
                   )}
-                  {currentQuestion.explanation && (
+                  {isCorrect && currentQuestion.explanation && (
                     <p className="quiz-feedback__desc">{currentQuestion.explanation}</p>
                   )}
                   {!isCorrect && (

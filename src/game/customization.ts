@@ -333,7 +333,7 @@ export const PAWN_CATALOG: readonly PawnSkinDef[] = [
 // ─── State & Persistence ──────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'olivia-ludo:customization:v1';
-export const INITIAL_COINS = 300;
+export const INITIAL_COINS = 1000;
 
 export interface CustomizationState {
   readonly coins: number;
