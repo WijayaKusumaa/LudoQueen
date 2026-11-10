@@ -18,6 +18,7 @@ import {
   type DiceSkinDef,
   type PawnSkinDef,
 } from '../../game/customization';
+import { QuizModal } from './QuizModal';
 
 /** Escape menutup, Tab berputar di dalam dialog, fokus awal ke elemen pertama. */
 function useDialogFocus(onClose?: () => void) {
@@ -251,6 +252,7 @@ export function TitleScreen(props: {
   const [activeTab, setActiveTab] = useState<CustomizationCategory>('arena');
   const [pendingBuy, setPendingBuy] = useState<PendingPurchase | null>(null);
   const [buyError, setBuyError] = useState<string | null>(null);
+  const [quizOpen, setQuizOpen] = useState(false);
 
   const handleCardClick = (
     category: CustomizationCategory,
@@ -293,10 +295,29 @@ export function TitleScreen(props: {
           </div>
 
           <div className="cust-header__right">
-            <div className="cust-coin-pill" aria-label={`Saldo koin: ${state.coins}`}>
+            <button
+              type="button"
+              id="quiz-coin-pill-btn"
+              className="cust-coin-pill cust-coin-pill--clickable"
+              onClick={() => setQuizOpen(true)}
+              aria-label={`Saldo koin: ${state.coins}. Klik untuk tambah koin lewat kuis`}
+              title="Dapatkan Koin Tambahan lewat Kuis!"
+            >
               <span className="cust-coin-pill__dot" aria-hidden="true">🪙</span>
               <span className="cust-coin-pill__amount">{state.coins} Coins</span>
-            </div>
+              <span className="cust-coin-pill__add" aria-hidden="true">+</span>
+            </button>
+
+            <button
+              type="button"
+              id="quiz-header-btn"
+              className="cust-icon-btn cust-quiz-btn"
+              onClick={() => setQuizOpen(true)}
+              aria-label="Kuis Koin"
+              title="Kuis Berhadiah Koin"
+            >
+              🧠
+            </button>
 
             <button
               type="button"
@@ -524,7 +545,20 @@ export function TitleScreen(props: {
             </div>
 
             {buyError && (
-              <p className="cust-modal__error" role="alert">{buyError}</p>
+              <div className="cust-modal__insufficient-box">
+                <p className="cust-modal__error" role="alert">{buyError}</p>
+                <button
+                  type="button"
+                  className="cust-modal__quiz-shortcut-btn"
+                  onClick={() => {
+                    setPendingBuy(null);
+                    setBuyError(null);
+                    setQuizOpen(true);
+                  }}
+                >
+                  🧠 Jawab Kuis untuk Tambah Koin
+                </button>
+              </div>
             )}
 
             <div className="cust-modal__actions">
@@ -550,6 +584,11 @@ export function TitleScreen(props: {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── Modal Kuis Berhadiah Koin ── */}
+      {quizOpen && (
+        <QuizModal onClose={() => setQuizOpen(false)} />
       )}
     </div>
   );
