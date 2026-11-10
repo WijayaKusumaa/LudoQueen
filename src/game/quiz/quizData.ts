@@ -69,6 +69,22 @@ export const QUIZ_QUESTIONS: readonly QuizQuestion[] = [
     correctTextAnswers: ['sana sini mau', 'sanasinimau', 'sana-sini mau'],
     explanation: 'SASIMO adalah istilah gaul singkatan dari "Sana Sini Mau"!',
   },
+  {
+    id: 'oot-4',
+    category: 'out_of_topic',
+    difficulty: 'hard',
+    reward: 1000,
+    question: 'Siapa kepala toko J ketika di Superindo?',
+    options: [
+      'Yuwono Restiadi',
+      'Miftahus Syukron Al Rasyid',
+      'Keceng',
+      'Pandu Akbar Swandana',
+      'Rachmad Qurnia Pratama',
+    ],
+    correctIndices: [1],
+    explanation: 'Kepala toko J ketika di Superindo adalah Miftahus Syukron Al Rasyid!',
+  },
 
   // ─── KATEGORI 2: PENGETAHUAN UMUM (10 - 50 KOIN) ─────────────────────────────
   {

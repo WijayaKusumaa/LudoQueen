@@ -1960,6 +1960,33 @@ html, body, #root {
   color: #ffffff;
 }
 
+.quiz-special-alert {
+  background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
+  border: 2px solid #eab308;
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(234, 179, 8, 0.3);
+  animation: bounceIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.quiz-special-alert__icon {
+  font-size: 1.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+  animation: pulse 1s infinite alternate;
+}
+
+.quiz-special-alert__text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #713f12;
+}
+
 .quiz-feedback {
   padding: 12px 16px;
   border-radius: 14px;

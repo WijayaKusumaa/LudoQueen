@@ -73,6 +73,7 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [isCorrect, setIsCorrect] = useState<boolean>(false);
   const [rewardClaimed, setRewardClaimed] = useState<number | null>(null);
+  const [specialToast, setSpecialToast] = useState<string | null>(null);
 
   // Secret unlock modal state
   const [showUnlockModal, setShowUnlockModal] = useState<boolean>(false);
@@ -106,11 +107,13 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
     setSubmitted(false);
     setIsCorrect(false);
     setRewardClaimed(null);
+    setSpecialToast(null);
   };
 
   // Switch category reset state
   const handleSwitchCategory = (cat: QuizCategory) => {
     setActiveCategory(cat);
+    setSpecialToast(null);
     const firstInCat = QUIZ_QUESTIONS.find((q) => q.category === cat);
     if (firstInCat) {
       handleSelectQuestion(firstInCat.id);
@@ -120,6 +123,15 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
   const handleToggleOption = (index: number) => {
     if (isCurrentLocked) return;
     if (submitted && isCorrect) return;
+
+    // Logika khusus pemberitahuan jika memilih "Keceng"
+    const chosenText = currentQuestion.options?.[index] ?? '';
+    if (chosenText.toLowerCase().includes('keceng')) {
+      setSpecialToast('Ngawur koen rek 😂🤣');
+    } else {
+      setSpecialToast(null);
+    }
+
     if (currentQuestion.multiSelect) {
       setSelectedOptions((prev) =>
         prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index],
@@ -283,10 +295,10 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
                 className={`quiz-diff-btn${difficultyFilter === diff ? ' quiz-diff-btn--active' : ''}`}
                 onClick={() => setDifficultyFilter(diff)}
               >
-                {diff === 'all' && 'Semua'}
-                {diff === 'easy' && 'Mudah (15 🪙)'}
-                {diff === 'medium' && 'Sedang (25 🪙)'}
-                {diff === 'hard' && 'Sulit (50 🪙)'}
+                {diff === 'all' && 'Semua (60 Soal)'}
+                {diff === 'easy' && 'Mudah (40 Soal · 15 🪙)'}
+                {diff === 'medium' && 'Sedang (10 Soal · 25 🪙)'}
+                {diff === 'hard' && 'Sulit (10 Soal · 50 🪙)'}
               </button>
             ))}
           </div>
@@ -365,6 +377,14 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Pemberitahuan Lucu Khusus (misal Opsi Keceng) */}
+          {specialToast && (
+            <div className="quiz-special-alert" role="alert">
+              <span className="quiz-special-alert__icon">🤣</span>
+              <p className="quiz-special-alert__text">{specialToast}</p>
             </div>
           )}
 

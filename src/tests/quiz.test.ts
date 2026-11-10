@@ -2,9 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { QUIZ_QUESTIONS, SECRET_UNLOCK_INFO } from '../game/quiz/quizData';
 
 describe('Sistem Kuis Berhadiah Koin (Quiz System)', () => {
-  it('memiliki soal Out of Topic dari Developer dengan reward 1000 koin', () => {
+  it('memiliki soal Out of Topic dari Developer dengan reward 1000 koin (4 soal)', () => {
     const ootQuestions = QUIZ_QUESTIONS.filter((q) => q.category === 'out_of_topic');
-    expect(ootQuestions.length).toBe(3);
+    expect(ootQuestions.length).toBe(4);
 
     for (const q of ootQuestions) {
       expect(q.reward).toBe(1000);
@@ -30,6 +30,13 @@ describe('Sistem Kuis Berhadiah Koin (Quiz System)', () => {
     expect(q3.type).toBe('essay');
     expect(q3.question).toContain('SASIMO');
     expect(q3.correctTextAnswers).toContain('sana sini mau');
+
+    // Soal 4: Kepala toko J di Superindo (Miftahus Syukron Al Rasyid)
+    const q4 = ootQuestions.find((q) => q.id === 'oot-4')!;
+    expect(q4).toBeDefined();
+    expect(q4.question).toContain('kepala toko J ketika di Superindo');
+    expect(q4.options?.[q4.correctIndices![0]!]).toBe('Miftahus Syukron Al Rasyid');
+    expect(q4.options).toContain('Keceng');
   });
 
   it('memiliki data tebakan rahasia pembuka kunci soal (tahu tek)', () => {
