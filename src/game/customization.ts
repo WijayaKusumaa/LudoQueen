@@ -333,7 +333,7 @@ export const PAWN_CATALOG: readonly PawnSkinDef[] = [
 // ─── State & Persistence ──────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'olivia-ludo:customization:v1';
-export const INITIAL_COINS = 1000;
+export const INITIAL_COINS = 300;
 
 export interface CustomizationState {
   readonly coins: number;
@@ -349,7 +349,7 @@ export interface CustomizationState {
   };
 }
 
-const DEFAULT_STATE: CustomizationState = {
+export const DEFAULT_STATE: CustomizationState = {
   coins: INITIAL_COINS,
   selected: {
     arena: 'classic',
@@ -489,6 +489,7 @@ export interface CustomizationContextValue {
   selectItem: (category: CustomizationCategory, id: string) => void;
   buyItem: (category: CustomizationCategory, id: string) => PurchaseResult;
   addCoins: (amount: number) => void;
+  resetAll: () => void;
 }
 
 const CustomizationCtx = createContext<CustomizationContextValue | null>(null);
@@ -526,6 +527,17 @@ export function CustomizationProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const resetAll = useCallback(() => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem('olivia-ludo:quiz:answered:v1');
+      localStorage.removeItem('olivia-ludo:quiz:locked:v1');
+    } catch {
+      /* abaikan error localStorage */
+    }
+    setState(DEFAULT_STATE);
+  }, []);
+
   const arenaDef = useMemo(
     () => ARENA_CATALOG.find((a) => a.id === state.selected.arena) ?? ARENA_CATALOG[0]!,
     [state.selected.arena],
@@ -548,8 +560,9 @@ export function CustomizationProvider({ children }: { children: ReactNode }) {
       selectItem,
       buyItem,
       addCoins,
+      resetAll,
     }),
-    [state, arenaDef, diceDef, pawnDef, selectItem, buyItem, addCoins],
+    [state, arenaDef, diceDef, pawnDef, selectItem, buyItem, addCoins, resetAll],
   );
 
   return createElement(CustomizationCtx.Provider, { value }, children);
@@ -567,6 +580,7 @@ export function useCustomization(): CustomizationContextValue {
       selectItem: () => { },
       buyItem: () => ({ ok: false, reason: 'INVALID_ITEM', state: DEFAULT_STATE }),
       addCoins: () => { },
+      resetAll: () => { },
     };
   }
   return ctx;

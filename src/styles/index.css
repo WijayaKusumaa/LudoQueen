@@ -1103,6 +1103,17 @@ html, body, #root {
   box-shadow: 0 3px 0 #78350f !important;
 }
 
+.cust-reset-btn {
+  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%) !important;
+  border-color: #7f1d1d !important;
+  box-shadow: 0 3px 0 #7f1d1d !important;
+}
+
+.cust-modal__reset-btn {
+  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%) !important;
+  box-shadow: 0 4px 0 #7f1d1d !important;
+}
+
 .cust-modal__insufficient-box {
   display: flex;
   flex-direction: column;

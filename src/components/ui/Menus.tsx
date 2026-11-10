@@ -248,11 +248,12 @@ export function TitleScreen(props: {
   onSettings: () => void;
 }) {
   const ref = useDialogFocus();
-  const { state, arenaDef, diceDef, pawnDef, selectItem, buyItem } = useCustomization();
+  const { state, arenaDef, diceDef, pawnDef, selectItem, buyItem, resetAll } = useCustomization();
   const [activeTab, setActiveTab] = useState<CustomizationCategory>('arena');
   const [pendingBuy, setPendingBuy] = useState<PendingPurchase | null>(null);
   const [buyError, setBuyError] = useState<string | null>(null);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const handleCardClick = (
     category: CustomizationCategory,
@@ -317,6 +318,17 @@ export function TitleScreen(props: {
               title="Kuis Berhadiah Koin"
             >
               🧠
+            </button>
+
+            <button
+              type="button"
+              id="reset-all-btn"
+              className="cust-icon-btn cust-reset-btn"
+              onClick={() => setShowResetConfirm(true)}
+              aria-label="Reset Semua Koin & Item"
+              title="Reset Semua Koin & Item ke Awal"
+            >
+              🔄
             </button>
 
             <button
@@ -578,6 +590,41 @@ export function TitleScreen(props: {
                   setPendingBuy(null);
                   setBuyError(null);
                 }}
+              >
+                Batal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal Dialog Konfirmasi Reset Total ── */}
+      {showResetConfirm && (
+        <div className="cust-modal-backdrop" role="dialog" aria-modal="true" aria-label="Konfirmasi Reset Data">
+          <div className="cust-modal cust-modal--reset">
+            <span className="cust-modal__badge">⚠️ KONFIRMASI RESET</span>
+            <h3 className="cust-modal__title">Reset Semua Koin & Aset?</h3>
+            <p className="cust-modal__sub">
+              Saldo koin akan dikembalikan ke <strong>300 Koin</strong>, seluruh arena, dadu, dan pion akan kembali terkunci seperti semula, serta riwayat kuis akan di-reset.
+            </p>
+
+            <div className="cust-modal__actions">
+              <button
+                type="button"
+                id="confirm-reset-btn"
+                className="cust-play-btn cust-modal__reset-btn"
+                onClick={() => {
+                  resetAll();
+                  setShowResetConfirm(false);
+                }}
+              >
+                Ya, Reset Semuanya 🔄
+              </button>
+              <button
+                type="button"
+                id="cancel-reset-btn"
+                className="cust-resume-btn"
+                onClick={() => setShowResetConfirm(false)}
               >
                 Batal
               </button>

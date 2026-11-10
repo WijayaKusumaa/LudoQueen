@@ -67,11 +67,12 @@ describe('Sistem Kustomisasi & Toko Ludo (Arena, Dice, Pawn)', () => {
     expect(next.selected.arena).toBe('classic');
   });
 
-  it('loadCustomizationState mengembalikan state default yang valid saat storage kosong', () => {
+  it('loadCustomizationState mengembalikan state default yang valid saat storage kosong dengan 300 koin awal', () => {
     const loaded = loadCustomizationState();
-    expect(loaded.owned.arena).toContain('classic');
-    expect(loaded.owned.dice).toContain('classic');
-    expect(loaded.owned.pawn).toContain('classic');
+    expect(loaded.coins).toBe(300);
+    expect(loaded.owned.arena).toEqual(['classic']);
+    expect(loaded.owned.dice).toEqual(['classic']);
+    expect(loaded.owned.pawn).toEqual(['classic']);
   });
 });
 
