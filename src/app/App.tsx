@@ -4,6 +4,7 @@ import { CustomizationProvider } from '../game/customization';
 import { GameHUD } from '../components/ui/GameHUD';
 import { SettingsPanel, SetupScreen, TitleScreen, type GameSessionConfig } from '../components/ui/Menus';
 import { SceneErrorBoundary, WebGLFallback, isWebGLAvailable } from '../components/ui/SceneFallback';
+import { LoadingScreen } from '../components/ui/LoadingScreen';
 import { PLAYER_ORDER, type PlayerColor } from '../game/board/boardLayout';
 import { audio } from '../game/audio/audio';
 import { useBotTurnRunner } from '../game/engine/ai';
@@ -124,10 +125,7 @@ function Shell({ animate, settings: s }: ShellProps) {
         />
       )}
 
-      <div className={`loading${ready ? ' loading--done' : ''}`} aria-hidden={ready} role="status">
-        <span className="loading__spinner" />
-        <p>Menyiapkan pulau…</p>
-      </div>
+      <LoadingScreen ready={ready} reducedMotion={!animate} />
     </main>
   );
 }
