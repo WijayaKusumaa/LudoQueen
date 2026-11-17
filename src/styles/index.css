@@ -1028,6 +1028,12 @@ html, body, #root {
   flex-shrink: 0;
 }
 
+.cust-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .cust-coin-pill {
   display: inline-flex;
   align-items: center;
@@ -2311,13 +2317,64 @@ html, body, #root {
 }
 
 /* ── Mobile & Short Screen Adjustments ── */
-@media (max-width: 520px) {
+@media (max-width: 620px) {
   .cust-menu__container {
-    padding: 10px 12px;
+    padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    gap: 8px;
+  }
+  .cust-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand actions"
+      "coins coins";
+    gap: 8px 10px;
+    align-items: center;
+  }
+  .cust-header__brand {
+    grid-area: brand;
+    min-width: 0;
     gap: 8px;
   }
   .cust-header__sub {
     display: none;
+  }
+  .cust-header__logo-badge {
+    width: 38px;
+    height: 38px;
+    font-size: 1.15rem;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+  .cust-header__title {
+    font-size: 1.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .cust-header__right {
+    display: contents;
+  }
+  .cust-header__actions {
+    grid-area: actions;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cust-icon-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+  .cust-coin-pill {
+    grid-area: coins;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 6px 14px;
+    box-sizing: border-box;
   }
   .cust-tab {
     min-height: 50px;
@@ -2345,6 +2402,25 @@ html, body, #root {
   .cust-play-btn {
     min-height: 48px;
     font-size: 1.02rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .cust-header__logo-badge {
+    width: 34px;
+    height: 34px;
+    font-size: 1.05rem;
+  }
+  .cust-header__title {
+    font-size: 1.02rem;
+  }
+  .cust-icon-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
+  }
+  .cust-coin-pill__amount {
+    font-size: 0.82rem;
   }
 }
 

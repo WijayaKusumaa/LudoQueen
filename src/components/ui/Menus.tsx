@@ -309,38 +309,40 @@ export function TitleScreen(props: {
               <span className="cust-coin-pill__add" aria-hidden="true">+</span>
             </button>
 
-            <button
-              type="button"
-              id="quiz-header-btn"
-              className="cust-icon-btn cust-quiz-btn"
-              onClick={() => setQuizOpen(true)}
-              aria-label="Kuis Koin"
-              title="Kuis Berhadiah Koin"
-            >
-              🧠
-            </button>
+            <div className="cust-header__actions">
+              <button
+                type="button"
+                id="quiz-header-btn"
+                className="cust-icon-btn cust-quiz-btn"
+                onClick={() => setQuizOpen(true)}
+                aria-label="Kuis Koin"
+                title="Kuis Berhadiah Koin"
+              >
+                🧠
+              </button>
 
-            <button
-              type="button"
-              id="reset-all-btn"
-              className="cust-icon-btn cust-reset-btn"
-              onClick={() => setShowResetConfirm(true)}
-              aria-label="Reset Semua Koin & Item"
-              title="Reset Semua Koin & Item ke Awal"
-            >
-              🔄
-            </button>
+              <button
+                type="button"
+                id="reset-all-btn"
+                className="cust-icon-btn cust-reset-btn"
+                onClick={() => setShowResetConfirm(true)}
+                aria-label="Reset Semua Koin & Item"
+                title="Reset Semua Koin & Item ke Awal"
+              >
+                🔄
+              </button>
 
-            <button
-              type="button"
-              id="settings-btn"
-              className="cust-icon-btn"
-              onClick={props.onSettings}
-              aria-label="Pengaturan"
-              title="Pengaturan"
-            >
-              ⚙️
-            </button>
+              <button
+                type="button"
+                id="settings-btn"
+                className="cust-icon-btn"
+                onClick={props.onSettings}
+                aria-label="Pengaturan"
+                title="Pengaturan"
+              >
+                ⚙️
+              </button>
+            </div>
           </div>
         </header>
 
