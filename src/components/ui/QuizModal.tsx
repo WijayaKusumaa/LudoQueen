@@ -398,7 +398,7 @@ export function QuizModal({ onClose }: QuizModalProps): React.ReactElement {
                 id="quiz-essay-field"
                 type="text"
                 className="quiz-essay-input"
-                placeholder="Contoh: ga ada contoh kerjain sendiri jink"
+                placeholder="Contoh: ga ada contoh kerjain sendiri ya"
                 value={essayAnswer}
                 onChange={(e) => setEssayAnswer(e.target.value)}
                 disabled={isCurrentLocked || (submitted && isCorrect)}

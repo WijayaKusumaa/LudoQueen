@@ -24,12 +24,13 @@ describe('Sistem Kuis Berhadiah Koin (Quiz System)', () => {
     expect(q2).toBeDefined();
     expect(q2.options?.[q2.correctIndices![0]!]).toBe('21 Oktober');
 
-    // Soal 3: Esai singkatan SASIMO (Sana Sini Mau)
+    // Soal 3: Esai penemu game Ludo (Alfred Collier 1896)
     const q3 = ootQuestions.find((q) => q.id === 'oot-3')!;
     expect(q3).toBeDefined();
     expect(q3.type).toBe('essay');
-    expect(q3.question).toContain('SASIMO');
-    expect(q3.correctTextAnswers).toContain('sana sini mau');
+    expect(q3.question).toContain('Penemu Game Ludo');
+    expect(q3.correctTextAnswers).toContain('alfred collier');
+    expect(q3.correctTextAnswers).toContain('alfred collier 1896');
 
     // Soal 4: Kepala toko J di Superindo (Miftahus Syukron Al Rasyid)
     const q4 = ootQuestions.find((q) => q.id === 'oot-4')!;
